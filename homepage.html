@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rural Health Unit Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-color: #e9f8f4;
+  min-height: 100vh;
+}
+
+/* Loader styles */
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #e9f8f4; /* same as your body background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* on top of everything */
+}
+
+.spinner {
+  width: 70px;
+  height: 70px;
+  border: 6px solid #cfd9df;
+  border-top: 6px solid #1e8c72; /* your theme color */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Hide loader when page is loaded */
+body.loaded #loader {
+  display: none;
+}
+
+
+/* HEADER */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background-color: #1e8c72;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 30px;
+  z-index: 1000;
+}
+
+.logo-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 100%;
+  background-color: white;
+  margin-right: 10px;
+}
+
+.h {
+  font-size: 36px;
+  position: absolute;
+  left: 8%;
+}
+
+h1 {
+  flex: 1;
+  font-size: 20px;
+  margin-left: 10px;
+}
+
+.header-icons i {
+  margin-left: 20px;
+  cursor: pointer;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1e8c72;
+  color: white;
+  padding: 15px 40px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo-circle {
+  width: 45px;
+  height: 45px;
+  background-color: white;
+  color: #1e8c72;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+}
+
+header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.header-right i {
+  font-size: 22px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.header-right i:hover {
+  color: #c9f2e6;
+}
+
+.clock {
+  font-size: 18px;
+  font-weight: 600;
+  background: #e9f8f4;
+  color: #1e8c72;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+
+.menu-container {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 40px;
+  background-color: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 10px 20px;
+  color: #333;
+  text-decoration: none;
+}
+
+.dropdown-menu a:hover {
+  background-color: #f0f0f0;
+}
+
+.show {
+  display: block;
+}
+
+
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 equal columns */
+  grid-template-rows: 3;
+  gap: 40px;
+  padding: 50px 100px;
+  justify-content: center;
+}
+
+
+.card {
+  width: 500px;
+  height: auto;
+  border-style: none;
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform .5s;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: scale(1.07);
+}
+
+.card .button_header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center; 
+}
+
+
+.card i {
+  align-items: right;
+  font-size: 48px;
+  color: #1e8c72;
+}
+
+.card h1 {
+  text-align: left;
+  margin: 10px;
+}
+
+.card p {
+  text-align: left;
+  font-size: 14px;
+  color: #555;
+  margin: 10px;
+}
+
+.card .button_details {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;            
+  width: 100%;                    
+  margin-top: 15px;
+}
+
+.card .a {
+  margin: 10px 10px 0 auto;
+  color: #0077cc;
+  font-weight: 500;
+  text-decoration: none;
+  text-align: right;              
+}
+
+.card a:hover {
+  text-decoration: underline;
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- Loader -->
+  <div id="loader">
+    <div class="spinner"></div>
+  </div>
+  <!-- HEADER -->
+    <header>
+    <div class="header-left">
+      <div class="logo-circle">
+        <i class="fas fa-clinic-medical"></i>
+      </div>
+      <h1 class="h">Rural Health Unit</h1>
+    </div>
+
+    <div class="header-right">
+      <div class="clock" id="clock"></div>
+      <i class="fas fa-bars" onclick="toggleMenu()"></i>
+      <div class="dropdown-menu" id="menu">
+        <a href="profile.html">Profile</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </header>
+
+
+  <main class="dashboard">
+
+    <!-- Dentistry -->
+    <button class="card" onclick="location.href='dentaldb.html'">
+      <div class="button_header">
+        <h1>Dentistry</h1>
+        <i class="fas fa-tooth"></i>
+      </div>
+      <p>Dental care, tooth extraction, cleaning, and oral health services</p>
+      <div class="button_details">
+        <span class="a">View Dashboard →</span>
+      </div>
+    </button>
+
+    <!-- Immunization -->
+    <button class="card" onclick="location.href='immunizationdb.html'">
+      <div class="button_header">
+        <h1>Immunization</h1>
+        <i class="fas fa-syringe"></i>
+      </div>
+      <p>Vaccination programs for children and adults</p>
+      <div class="button_details">
+        <span class="a">View Dashboard →</span>
+      </div>
+    </button>
+
+    <!-- Maternal -->
+    <button class="card" onclick="location.href='maternaldb.html'">
+      <div class="button_header">
+        <h1>Maternal</h1>
+        <i class="fas fa-female"></i>
+      </div>
+      <p>Tracks and supports maternal health services</p>
+      <div class="button_details">
+        <span class="a">View Dashboard →</span>
+      </div>
+    </button>
+
+    <!-- Health Check Up -->
+    <button class="card" onclick="location.href='healthcheckdb.html'">      
+      <div class="button_header">
+        <h1>Health Check Up</h1>
+        <i class="fas fa-stethoscope"></i>
+      </div>
+      <p>General consultation, health screening, and preventive care</p>
+      <div class="button_details">
+        <span class="a">View Dashboard →</span>
+      </div>
+    </button>
+
+    <!-- Medicine -->
+    <button class="card" onclick="location.href='medicinedb.html'">     
+      <div class="button_header">
+        <h1>Medicine</h1>
+        <i class="fas fa-hand-holding-medical"></i>
+      </div>
+      <p>Prescription services, medicine inventory, and distribution</p>
+      <div class="button_details">
+        <span class="a">View Dashboard →</span>
+      </div>
+    </button>
+
+  </main>
+  
+  <script>
+    window.addEventListener("load", function() {
+    setTimeout(function() {
+    document.body.classList.add("loaded");
+    }, 400); // 1 second delay
+    });
+
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const seconds = now.getSeconds().toString().padStart(2, '0');
+
+      // Determine AM or PM
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+
+      // Convert to 12-hour format
+      hours = hours % 12;
+      hours = hours ? hours : 12; // 0 becomes 12
+
+      const timeString = `${hours}:${minutes}:${seconds} ${ampm}`;
+      document.getElementById("clock").textContent = timeString;
+    }
+
+    // Update every second
+    setInterval(updateClock, 1000);
+    updateClock();
+
+  
+
+    function toggleMenu() {
+    document.getElementById("menu").classList.toggle("show");
+    }
+
+    function logout() {
+      window.location.href = "login.html";
+    }
+
+     // Optional: Close menu when clicking outside
+    window.onclick = function(event) {
+    if (!event.target.matches('.fa-bars')) {
+      document.getElementById("menu").classList.remove("show");
+    }
+    }
+  </script>
+
+</body>
+</html>
