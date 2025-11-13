@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="login_style.css" />
+</head>
+<body>
+
+<div class="logo"></div>
+
+<div class="login-box">
+  <i class="fa fa-user"></i>
+  <p>Sign in to your account</p>
+
+  <form method="POST" action="login.php">
+    <div class="input-box">
+      <input type="text" name="username" required />
+      <label>Username</label>
+    </div>
+
+    <div class="input-box password-field">
+      <input type="password" name="password" required />
+      <label>Password</label>
+      <i class="fa fa-eye" onclick="togglePassword()"></i>
+    </div>
+
+    <button type="submit" class="btn">
+      <span>Sign in</span>
+      <i class="fa fa-arrow-right arrow"></i>
+    </button>
+  </form>
+</div>
+
+<script>
+function togglePassword() {
+  const input = document.querySelector('.password-field input');
+  const icon = document.querySelector('.password-field i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.remove('fa-eye');
+    icon.classList.add('fa-eye-slash');
+  } else {
+    input.type = 'password';
+    icon.classList.remove('fa-eye-slash');
+    icon.classList.add('fa-eye');
+  }
+}
+</script>
+
+</body>
+</html>
