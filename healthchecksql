@@ -1,0 +1,55 @@
+CREATE TABLE individual_health_record (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    -- Checkbox fields
+    NHTS TINYINT(1),
+    FourPs TINYINT(1),
+    NonNHTS TINYINT(1),
+    PWD TINYINT(1),
+
+    -- NHTS Information
+    NHTS_HH_no VARCHAR(100),
+    code_no VARCHAR(100),
+    family_no VARCHAR(100),
+    NHTS_member_head VARCHAR(150),
+    DOB_head DATE,
+    relationship_to_household_head VARCHAR(150),
+
+    -- PhilHealth
+    PhilHealth_member ENUM('yes', 'no'),
+    PhilHealth_no VARCHAR(50),
+
+    -- Mother's maiden name
+    mother_maiden_name VARCHAR(150),
+
+    -- Name
+    first_name VARCHAR(100) NOT NULL,
+    middle_name VARCHAR(100),
+    last_name VARCHAR(100) NOT NULL,
+    suffix VARCHAR(20),
+
+    -- Personal
+    DOB DATE NOT NULL,
+    age INT NOT NULL,
+    sex VARCHAR(10) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+
+    -- Address
+    province VARCHAR(150),
+    municipality VARCHAR(150),
+    barangay VARCHAR(150),
+
+    -- Health Info
+    hx_of_allergies VARCHAR(255),
+    blood_type VARCHAR(10),
+    date_recorded DATE NOT NULL,
+    BP VARCHAR(20),
+    temp VARCHAR(10),
+    weight VARCHAR(20),
+    RR INT,
+    PR INT,
+    height VARCHAR(20),
+
+    -- Timestamp
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
