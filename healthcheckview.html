@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Individual Health Record | RHU Management System</title>
+
+  <!-- Ionicons -->
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+  <!-- External CSS -->
+  <link rel="stylesheet" href="healthcheckview.css" />
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <h1>Health Check Up Management System</h1>
+  </header>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <ul>
+      <li><a href="homepage.html"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+      <li><a href="healthcheckdb.html"><ion-icon name="grid-outline"></ion-icon> Dashboard</a></li>
+      <li><a href="healthcheckadd.html"><ion-icon name="person-add-outline"></ion-icon> Add Patient</a></li>
+    </ul>
+  </div>
+
+  <!-- Page Title -->
+  <legend>📋 Individual Treatment Record - View Details</legend>
+
+  <main class="main">
+    <!-- Top Buttons -->
+    <div class="top-actions">
+      <a href="healthcheckdb.html" class="btn btn-back">
+        <ion-icon name="arrow-back-outline"></ion-icon> Back to Dashboard
+      </a>
+      <button class="btn btn-print" onclick="window.print()">
+        <ion-icon name="print-outline"></ion-icon> Print / Save as PDF
+      </button>
+    </div>
+
+    <!-- Main Content -->
+    <section class="content">
+      <div class="section-title"> Individual Treatment Record </div>
+      <!-- SECTION 1: Household / Membership Info -->
+      <div class="view-record-section">
+        <div class="tag-list">
+          <span class="tag">NHTS</span>
+          <span class="tag">4Ps</span>
+          <span class="tag">Non-NHTS</span>
+          <span class="tag">PWD</span>
+        </div>
+
+        <div class="view-grid">
+          <div class="field-item"><div class="field-label">NHTS HH No.:</div><div class="field-value"><?= htmlspecialchars($patient['NHTS_HH_no']) ?></div></div>
+          <div class="field-item"><div class="field-label">Code No.:</div><div class="field-value"><?= htmlspecialchars($patient['code_no']) ?></div></div>
+          <div class="field-item"><div class="field-label">Family No.:</div><div class="field-value"><?= htmlspecialchars($patient['family_no']) ?></div></div>
+          <div class="field-item"><div class="field-label">NHTS Member/Head:</div><div class="field-value"><?= htmlspecialchars($patient['NHTS_member_head']) ?></div></div>
+          <div class="field-item"><div class="field-label">DOB (Head/Member):</div><div class="field-value"><?= date("F d, Y", strtotime($patient['DOB_head'])) ?></div></div>
+          <div class="field-item"><div class="field-label">Relationship to Household Head:</div><div class="field-value"><?= htmlspecialchars($patient['relationship_to_household_head']) ?></div></div>
+          <div class="field-item"><div class="field-label">PhilHealth Member:</div><div class="field-value"><?= ucfirst($patient['PhilHealth_member']) ?></div></div>
+          <div class="field-item"><div class="field-label">PhilHealth No.:</div><div class="field-value"><?= htmlspecialchars($patient['PhilHealth_no']) ?></div></div>
+          <div class="field-item"><div class="field-label">Mother’s Maiden Name:</div><div class="field-value"><?= htmlspecialchars($patient['mother_maiden_name']) ?></div></div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: Patient Info -->
+      <div class="view-record-section">
+        <div class="view-grid">
+          <div class="field-item"><div class="field-label">Name:</div><div class="field-value"><?= htmlspecialchars($patient['name']) ?></div></div>
+          <div class="field-item"><div class="field-label">Date of Birth:</div><div class="field-value"><?= date("F d, Y", strtotime($patient['DOB'])) ?></div></div>
+          <div class="field-item"><div class="field-label">Age:</div><div class="field-value"><?= $patient['age'] ?></div></div>
+          <div class="field-item"><div class="field-label">Sex:</div><div class="field-value"><?= htmlspecialchars($patient['sex']) ?></div></div>
+          <div class="field-item"><div class="field-label">Status:</div><div class="field-value"><?= htmlspecialchars($patient['status']) ?></div></div>
+        </div>
+
+        <div class="field-item" style="margin-top:15px;">
+          <div class="field-item"><div class="field-label">Address:</div>
+          <div class="field-value"><?= htmlspecialchars($patient['address']) ?></div></div>
+        </div>
+
+        <div class="view-grid" style="margin-top:15px;">
+
+          <div class="field-item"><div class="field-label">Hx. of Allergies:</div><div class="field-value"><?= htmlspecialchars($patient['hx_of_allergies']) ?></div></div>
+          <div class="field-item"><div class="field-label">Blood Type:</div><div class="field-value"><?= htmlspecialchars($patient['blood_type']) ?></div></div>
+          <div class="field-item"><div class="field-label">Date Recorded:</div><div class="field-value"><?= date("F d, Y", strtotime($patient['date_recorded'])) ?></div></div>
+          <div class="field-item"><div class="field-label">BP:</div><div class="field-value"><?= htmlspecialchars($patient['BP']) ?></div></div>
+          <div class="field-item"><div class="field-label">Temp:</div><div class="field-value"><?= htmlspecialchars($patient['temp']) ?></div></div>
+          <div class="field-item"><div class="field-label">Weight:</div><div class="field-value"><?= htmlspecialchars($patient['weight']) ?></div></div>
+          <div class="field-item"><div class="field-label">RR:</div><div class="field-value"><?= $patient['RR'] ?></div></div>
+          <div class="field-item"><div class="field-label">PR:</div><div class="field-value"><?= $patient['PR'] ?></div></div>
+          <div class="field-item"><div class="field-label">Height:</div><div class="field-value"><?= htmlspecialchars($patient['height']) ?></div></div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+</body>
+</html>
