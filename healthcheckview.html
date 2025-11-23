@@ -47,11 +47,11 @@
       <div class="section-title"> Individual Treatment Record </div>
       <!-- SECTION 1: Household / Membership Info -->
       <div class="view-record-section">
-        <div class="tag-list">
-          <span class="tag">NHTS</span>
-          <span class="tag">4Ps</span>
-          <span class="tag">Non-NHTS</span>
-          <span class="tag">PWD</span>
+        <div class="view-grid1">
+          <span class="field-label">NHTS: <?= $patient['NHTS'] ? "Yes" : "No" ?></span><br>
+          <span class="field-label">4Ps: <?= $patient['FourPs'] ? "Yes" : "No" ?></span><br>
+          <span class="field-label">Non-NHTS: <?= $patient['NonNHTS'] ? "Yes" : "No" ?></span><br>
+          <span class="field-label">PWD: <?= $patient['PWD'] ? "Yes" : "No" ?></span>
         </div>
 
         <div class="view-grid">

@@ -97,28 +97,13 @@ body {
   text-align: center;
 }
 
-.tag-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.tag {
-  padding: 5px 10px;
-  border-radius: 20px;
-  background-color: #e9f8f4;
-  border: 1px solid #b5e3da;
-  font-size: 13px;
-  color: #2e7267;
-}
-
 .view-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px 30px;
   margin-top: 10px;
 }
+
 
 .field-item {
   margin-bottom: 5px;
