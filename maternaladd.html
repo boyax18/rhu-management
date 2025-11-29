@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Maternal Health Record | RHU Management System</title>
+
+  <!-- Ionicons -->
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="maternaladd.css" />
+</head>
+
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <h1>Maternal Health Management System</h1>
+  </header>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <ul>
+      <li><a href="homepage.html"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+      <li><a href="maternaldb.html"><ion-icon name="grid-outline"></ion-icon> Dashboard</a></li>
+      <li><a href="#" class="active"><ion-icon name="person-add-outline"></ion-icon> Add Patient</a></li>
+    </ul>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <section class="content">
+
+      <legend>👩‍🍼 Maternal Health Record</legend>
+
+      <form class="fillup_form">
+
+        <!-- SECTION 1 -->
+        <fieldset>
+          <legend>1. Mother’s Identification & Vitals</legend>
+
+          <div class="form-grid">
+            <div><label>Family Number:</label><input type="text"></div>
+            <div><label>NHTS/4Ps Status:</label><input type="text"></div>
+            <div><label>Code No.:</label><input type="text"></div>
+            <div><label>PhilHealth No.:</label><input type="text"></div>
+            <div><label>Civil Status:</label><input type="text"></div>
+            <div><label>Contact No.:</label><input type="text"></div>
+            <div><label>Name of Clinic:</label><input type="text"></div>
+            <div><label>Maiden Family Name:</label><input type="text"></div>
+            <div><label>Maiden First Name:</label><input type="text"></div>
+            <div><label>Maiden Middle Name:</label><input type="text"></div>
+            <div><label>Age:</label><input type="number"></div>
+            <div><label>Address (Barangay/City):</label><input type="text"></div>
+            <div><label>Date of Birth:</label><input type="date"></div>
+            <div><label>Occupation:</label><input type="text"></div>
+            <div><label>Height (m):</label><input type="text"></div>
+            <div><label>BMI:</label><input type="text"></div>
+            <div><label>MUAC (cm):</label><input type="text"></div>
+          </div>
+        </fieldset>
+
+        <!-- SECTION 2 -->
+        <fieldset>
+          <legend>2. Husband’s Information</legend>
+
+          <div class="form-grid">
+            <div><label>Family Name:</label><input type="text"></div>
+            <div><label>First Name:</label><input type="text"></div>
+            <div><label>Middle Name:</label><input type="text"></div>
+            <div><label>Occupation:</label><input type="text"></div>
+          </div>
+        </fieldset>
+
+        <!-- SECTION 3 -->
+        <fieldset>
+          <legend>3. Obstetrical History & Complications</legend>
+
+          <div class="form-grid">
+            <div><label>No. of Children Alive:</label><input type="number"></div>
+            <div><label>Living Children:</label><input type="number"></div>
+            <div><label>No. of Abortion:</label><input type="number"></div>
+            <div><label>No. of Stillbirth:</label><input type="number"></div>
+          </div>
+
+          <div class="checkbox-group">
+            <label><input type="checkbox"> Hemorrhage</label>
+            <label><input type="checkbox"> Toxemia</label>
+            <label><input type="checkbox"> Placenta Previa</label>
+            <label><input type="checkbox"> Sepsis</label>
+            <label><input type="checkbox"> Hypertension</label>
+          </div>
+        </fieldset>
+
+        <!-- SECTION 4 -->
+        <fieldset>
+          <legend>4. Current Signs and Symptoms</legend>
+
+          <div class="checkbox-group">
+            <label><input type="checkbox"> Nausea</label>
+            <label><input type="checkbox"> Vomiting</label>
+            <label><input type="checkbox"> Headache</label>
+            <label><input type="checkbox"> Dizziness</label>
+            <label><input type="checkbox"> Leucorrhea</label>
+            <label><input type="checkbox"> Edema</label>
+            <label><input type="checkbox"> Cramps</label>
+            <label><input type="checkbox"> Bleeding</label>
+            <label><input type="checkbox"> Pruritis</label>
+            <label><input type="checkbox"> Blurring</label>
+          </div>
+        </fieldset>
+
+        <!-- SECTION 5 -->
+        <fieldset>
+          <legend>5. Dietary Pattern, Preparation & Delivery Info</legend>
+
+          <div class="form-grid">
+            <div><label>Food Regularly Taken:</label><input type="text"></div>
+            <div><label>Food Avoided:</label><input type="text"></div>
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <label>A. Ante-partum / B. Post-partum:</label>
+              <select>
+                <option value="">Select</option>
+                <option value="Ante-partum">Ante-partum</option>
+                <option value="Post-partum">Post-partum</option>
+              </select>
+            </div>
+
+            <div>
+              <label>Prepared for Breastfeeding?</label>
+              <div class="radio-group">
+                <label><input type="radio" name="prepared" value="Yes"> Yes</label>
+                <label><input type="radio" name="prepared" value="No"> No</label>
+              </div>
+            </div>
+
+            <div>
+              <label>Reason if not prepared:</label>
+              <input type="text">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div><label>Date of Delivery:</label><input type="date"></div>
+            <div><label>Type of Delivery:</label><input type="text"></div>
+            <div><label>Place of Delivery:</label><input type="text"></div>
+            <div><label>Attended By:</label><input type="text"></div>
+            <div><label>Designation:</label><input type="text"></div>
+            <div style="grid-column: span 3;"><label>Delivery Address:</label><input type="text"></div>
+          </div>
+        </fieldset>
+
+        <!-- SECTION 6 -->
+        <fieldset>
+          <legend>6. Ante-partum (GTPAL) & Lab Data</legend>
+
+          <div class="form-grid">
+            <div><label>LMP:</label><input type="date"></div>
+            <div><label>EDC:</label><input type="date"></div>
+            <div><label>Risk Code:</label><input type="text"></div>
+            <div><label>Deworming:</label><input type="text"></div>
+            <div><label>Gravida:</label><input type="number"></div>
+            <div><label>Term:</label><input type="number"></div>
+            <div><label>Para:</label><input type="number"></div>
+            <div><label>Abortion:</label><input type="number"></div>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="submit-btn">Save Record</button>
+
+      </form>
+    </section>
+  </main>
+
+</body>
+</html>
