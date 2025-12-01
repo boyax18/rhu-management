@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medicine Management | RHU Management System</title>
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+  <link rel="stylesheet" href="medicineadd.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <h1>Medicine Management System</h1>
+  </header>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <ul>
+      <li><a href="homepage.html"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+      <li><a href="medicinedb.html"><ion-icon name="grid-outline"></ion-icon> Dashboard</a></li>
+      <li><a href="#" class="active"><ion-icon name="medkit-outline"></ion-icon> Add Medicine</a></li>
+    </ul>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <ul>
+      <li><a href="homepage.html"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+      <li><a href="medicinedb.html"><ion-icon name="grid-outline"></ion-icon> Recipients</a></li>
+      <li><a href="medicineedit.html"><ion-icon name="medkit-outline"></ion-icon> Medicines</a></li>      
+      <li><a href="#" class="active"><i class="fas fa-hand-holding-medical"></i> Meds Distribution</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <main class="main">
+    <section class="content">
+      <legend>Medicine Administration Form</legend>
+
+      <form class="fillup_form" method="POST" action="medicine_add.php">
+        
+        <!-- PATIENT INFORMATION -->
+        <fieldset>
+          <legend>Patient Information</legend>
+          <div class="form-grid">
+            <div><label>First Name:</label><input type="text" name="first_name" required></div>
+            <div><label>Middle Name:</label><input type="text" name="middle_name"></div>
+            <div><label>Last Name:</label><input type="text" name="last_name" required></div>
+            <div><label>Suffix:</label><input type="text" name="suffix"></div>
+            <div><label>Sex:</label><input type="text" name="sex" required></div>
+            <div><label>Date of Birth:</label><input type="date" name="dob" required></div>
+            <div><label>Contact Number:</label><input type="tel" name="contact_number"></div>
+          </div>
+        </fieldset>
+
+        <!-- MEDICATION INFORMATION -->
+        <fieldset>
+          <legend>Medication Information</legend>
+          <div class="form-grid">
+            <div><label>Medicine Name:</label><input type="text" name="medicine_name" required></div>
+            <div><label>Batch Number:</label><input type="text" name="batch_number"></div>
+            <div><label>Quantity Given:</label><input type="number" name="quantity" min="1" required></div>
+            <div><label>Unit:</label><input type="text" name="unit" placeholder="e.g., tablet, ml" required></div>
+            <div><label>Expiration Date:</label><input type="date" name="expiration_date" required></div>
+            <div><label>Additional Notes:</label><textarea name="notes" rows="3"></textarea></div>
+          </div>
+        </fieldset>
+
+        <!-- ADMINISTERED BY -->
+        <fieldset>
+          <legend>Administered By</legend>
+          <div class="form-grid">
+            <div><label>Name of Staff:</label><input type="text" name="staff_name" required></div>
+            <div><label>Designation / Role:</label><input type="text" name="staff_role"></div>
+            <div><label>Date Given:</label><input type="date" name="date_given" required></div>
+            <div><label>Time Given:</label><input type="time" name="time_given"></div>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="submit-btn">Submit Record</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

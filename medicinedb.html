@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medicine Distribution Dashboard | RHU</title>
+  <link rel="stylesheet" href="medicinedb.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <h1>Medicine Distribution System</h1>
+  </header>
+
+    <!-- Sidebar -->
+  <div class="sidebar">
+    <ul>
+      <li><a href="homepage.html"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+      <li><a href="#" class="active"><ion-icon name="grid-outline"></ion-icon> Recipients</a></li>
+      <li><a href="medicineedit.html"><ion-icon name="medkit-outline"></ion-icon> Medicines</a></li>      
+      <li><a href="medicineadd.html"><i class="fas fa-hand-holding-medical"></i> Meds Distribution</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <main class="main">
+    <section class="content">
+      <h2>Medicine Distribution Records</h2>
+
+      <div class="top-bar">
+        <div class="search-box">
+          <ion-icon name="search-outline"></ion-icon>
+          <input type="text" placeholder="Search Recipient's Name" />
+        </div>
+        <div class="total">
+          <span>Total Distributions:</span>
+          <div class="count">0</div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>File No.</th>
+              <th>Recipient Name</th>
+              <th>Date Receive</th> 
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data will be populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+  
+    </section>
+  </main>
+</body>
+</html>

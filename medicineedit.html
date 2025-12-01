@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Medicine | RHU Management System</title>
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+  <link rel="stylesheet" href="medicineadd.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <h1>Medicine Management System</h1>
+  </header>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <ul>
+      <li><a href="homepage.html"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+      <li><a href="medicinedb.html"><ion-icon name="grid-outline"></ion-icon> Recipients</a></li>
+      <li><a href="#" class="active"><ion-icon name="medkit-outline"></ion-icon> Medicine</a></li>
+      <li><a href="medicineadd.html"><i class="fas fa-hand-holding-medical"></i> Meds Distribution</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <main class="main">
+    <section class="content">
+      <legend>Add New Medicine</legend>
+
+      <form class="fillup_form" method="POST" action="medicine_add.php">
+        <fieldset>
+          <legend>Medicine Information</legend>
+          <div class="form-grid">
+            <div>
+              <label>Medicine Name:</label>
+              <input type="text" name="medicine_name" placeholder="Enter medicine name" required>
+            </div>
+            <div>
+              <label>Quantity:</label>
+              <input type="number" name="quantity" placeholder="Enter quantity" min="1" required>
+            </div>
+            <div>
+              <label>Unit:</label>
+              <input type="text" name="unit" placeholder="e.g., tablet, ml" required>
+            </div>
+            <div>
+              <label>Expiration Date:</label>
+              <input type="date" name="expiration_date" required>
+            </div>
+            <div>
+              <label>Batch Number:</label>
+              <input type="text" name="batch_number" placeholder="Optional">
+            </div>
+            <div>
+              <label>Notes:</label>
+              <textarea name="notes" rows="3" placeholder="Additional notes"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="submit-btn">Add Medicine</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
