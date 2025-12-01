@@ -1,0 +1,91 @@
+<?php
+include 'db_connect.php';
+
+// Fetch data
+$sql = "SELECT id, maiden_family_name, maiden_first_name, maiden_middle_name, age, created_at 
+        FROM maternal_records 
+        ORDER BY id DESC";
+
+$result = $conn->query($sql);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maternal Dashboard | RHU Management System</title>
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+  <link rel="stylesheet" href="maternaldb.css" />
+</head>
+<body>
+
+<header class="header">
+  <h1>Maternal Management System</h1>
+</header>
+
+<div class="sidebar">
+  <ul>
+    <li><a href="homepage.php"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+    <li><a href="#" class="active"><ion-icon name="grid-outline"></ion-icon> Dashboard</a></li>
+    <li><a href="maternaladd.php"><ion-icon name="person-add-outline"></ion-icon> Add Patient</a></li>
+  </ul>
+</div>
+
+<main class="main">
+  <section class="content">
+    <h2>LIST OF PATIENT</h2>
+
+    <div class="top-bar">
+      <div class="search-box">
+        <ion-icon name="search-outline"></ion-icon>
+        <input type="text" placeholder="Search" />
+      </div>
+      <div class="total">
+        <span>Total of Patient:</span>
+        <div class="count"><?php echo $result->num_rows; ?></div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name (Last, First M.)</th>
+            <th>Age</th>
+            <th>Date Registered</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <?php while ($row = $result->fetch_assoc()): ?>
+            <tr>
+              <td><?php echo $row['id']; ?></td>
+
+              <td>
+                <?php
+                  echo $row['maiden_family_name'] . ", " . 
+                       $row['maiden_first_name'] . " " . 
+                       substr($row['maiden_middle_name'], 0, 1) . ".";
+                ?>
+              </td>
+
+              <td><?php echo $row['age']; ?></td>
+              <td><?php echo date("Y-m-d", strtotime($row['created_at'])); ?></td>
+
+              <td>
+                <a href="maternalview.php?id=<?php echo $row['id']; ?>">View</a>
+              </td>
+            </tr>
+          <?php endwhile; ?>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+</main>
+
+</body>
+</html>
