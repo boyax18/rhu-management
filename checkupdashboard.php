@@ -1,0 +1,294 @@
+<?php
+session_start();
+
+// Prevent browser caching
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: 0");
+
+// Block access if not logged in
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Include your database connection AFTER session check
+include 'db_connect.php';
+
+// Fetch patients
+$sql = "SELECT * FROM healthcheck_patients ORDER BY id DESC";
+$result = $conn->query($sql);
+$total_patients = $result->num_rows;
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Health Check Up Dashboard | RHU Management System</title>
+
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+body { background-color:#e9f8f4; min-height:100vh; }
+
+/* Header & Sidebar */
+.header { position:fixed; top:0; left:0; width:100%; height:76px; background-color:#1e8c72; color:white; display:flex; align-items:center; padding:0 40px; z-index:1000; }
+.sidebar { position:fixed; top:70px; left:0; width:240px; height:calc(100% - 70px); background-color:#57cba7; color:white; padding:25px 20px; }
+.sidebar ul { list-style:none; }
+.sidebar ul li a { display:block; color:#fff; text-decoration:none; margin-top:10px; padding:10px 15px; border-radius:8px; transition:all .3s ease; }
+.sidebar ul li a:hover, .sidebar ul li a.active { background-color:#b2f2dc; color:#1e8c72; font-weight:600; transform:scale(1.02); }
+
+/* Main Content */
+main { margin-left:260px; padding:100px 40px 40px; background-color:#e9f8f4; min-height:100vh; }
+.content { background:#fff; border-radius:12px; padding:30px; box-shadow:0 4px 10px rgba(0,0,0,0.08); }
+.content h2 { text-align:center; color:#2e7267; margin-bottom:25px; font-weight:600; }
+
+/* Top bar */
+.top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap:12px; }
+.search-box { display:flex; align-items:center; background-color:#f0fbf8; border:1px solid #b5e3da; border-radius:25px; padding:8px 15px; width:50%; }
+.search-box ion-icon { color:#3f8d82; font-size:18px; margin-right:8px; }
+.search-box input { border:none; outline:none; background:transparent; flex:1; font-size:14px; }
+.total { display:flex; align-items:center; gap:10px; font-weight:500; color:#2e7267; }
+.total .count { background:#e9f8f4; border:1px solid #a4dcd2; padding:5px 15px; border-radius:8px; font-weight:600; }
+
+/* Table */
+.table-container { border:2px solid #3f8d82; border-radius:10px; overflow:hidden; margin-top:15px; }
+table { width:100%; border-collapse:collapse; }
+th, td { padding:12px; text-align:left; font-size:15px; border-bottom:1px solid #e0efeb; }
+th { background-color:#c5f4e5; color:#2e7267; font-weight:600; }
+tr:nth-child(even) { background-color:#f9fdfc; }
+.view-btn { background-color:#5eb5a9; color:white; border:none; border-radius:20px; padding:6px 15px; font-size:13px; cursor:pointer; transition:all 0.2s ease; }
+.view-btn:hover { background-color:#3f8d82; }
+
+/* Modal */
+.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:2000; }
+.modal.show { display:flex; }
+.modal-content { background:#fff; border-radius:12px; padding:30px; width:90%; max-width:900px; max-height:90%; overflow-y:auto; position:relative; }
+.close-btn { position:absolute; top:15px; right:15px; background:#e74c3c; color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; }
+
+/* Modal internals */
+.view-record-section { border:1px solid #b5e3da; border-radius:8px; padding:20px; margin-bottom:20px; }
+.view-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px 30px; margin-top:10px; }
+.view-grid1 { display:grid; gap:8px; }
+.field-item { margin-bottom:6px; }
+.field-label { font-size:13px; font-weight:500; color:#668b83; }
+.field-value { font-size:15px; font-weight:600; color:#244a42; margin-top:4px; }
+.btn-print { background:#2e7267; color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<header class="header">
+    <h1>Health Check Up Management</h1>
+</header>
+
+<div class="sidebar">
+    <ul>
+        <li><a href="homepage.php"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+        <li><a href="#" class="active"><ion-icon name="grid-outline"></ion-icon> Dashboard</a></li>
+        <li><a href="healthcheckadd.php"><ion-icon name="person-add-outline"></ion-icon> Add Patient</a></li>
+    </ul>
+</div>
+
+<main class="main">
+    <section class="content">
+        <h2>LIST OF PATIENT</h2>
+
+        <div class="top-bar">
+            <div class="search-box">
+                <ion-icon name="search-outline"></ion-icon>
+                <input type="text" placeholder="Search" id="searchInput">
+            </div>
+
+            <div class="total">
+                <span>Total of Patient:</span>
+                <div class="count"><?php echo $total_patients; ?></div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>File No.</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Date Recorded</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    if ($result->num_rows > 0) {
+                        while($row = $result->fetch_assoc()) {
+                            // Put JSON into data-row safely (escape single quotes)
+                            $json = htmlspecialchars(json_encode($row), ENT_QUOTES, 'UTF-8');
+                            echo "<tr>";
+                            echo "<td>" . $row['id'] . "</td>";
+                            echo "<td>" . htmlspecialchars($row['name']) . "</td>";
+                            echo "<td>" . $row['age'] . "</td>";
+                            echo "<td>" . $row['date_recorded'] . "</td>";
+                            echo "<td><button class='view-btn' data-row='{$json}' onclick='openModal(this)'>View</button></td>";
+                            echo "</tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='5'>No records found</td></tr>";
+                    }
+                    $conn->close();
+                    ?>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal" id="patientModal" aria-hidden="true">
+            <div class="modal-content" id="modalContent" role="dialog" aria-modal="true">
+                <button class="close-btn" id="closeModalBtn" onclick="closeModal()">Close</button>
+                <div id="patientData"></div>
+
+                <div style="text-align:right; margin-top:10px;">
+                    <button id="download-pdf" class="btn-print">
+                        <ion-icon name="download-outline"></ion-icon> Download PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</main>
+
+<script>
+/**
+ * Open modal using button element that has data-row attribute.
+ * The button element itself is passed as "btn".
+ */
+function openModal(btn) {
+    let raw = btn.getAttribute('data-row') || '{}';
+    let data;
+    try {
+        data = JSON.parse(raw);
+    } catch (e) {
+        console.error('Invalid JSON in data-row', e);
+        data = {};
+    }
+
+    const modal = document.getElementById('patientModal');
+    const container = document.getElementById('patientData');
+
+    container.innerHTML = `
+        <div class="view-record-section">
+            <div class="view-grid1">
+                <label><input type="checkbox" ${((data.NHTS == 1 || data.NHTS === "1") ? 'checked' : '')} disabled> NHTS</label>
+                <label><input type="checkbox" ${((data.FourPs == 1 || data.FourPs === "1") ? 'checked' : '')} disabled> 4Ps</label>
+                <label><input type="checkbox" ${((data.NonNHTS == 1 || data.NonNHTS === "1") ? 'checked' : '')} disabled> Non-NHTS</label>
+                <label><input type="checkbox" ${((data.PWD == 1 || data.PWD === "1") ? 'checked' : '')} disabled> PWD</label>
+            </div>
+
+            <div class="view-grid" style="margin-top:10px;">
+                <div class="field-item"><div class="field-label">NHTS HH No.:</div><div class="field-value">${data.NHTS_HH_no || ''}</div></div>
+                <div class="field-item"><div class="field-label">Code No.:</div><div class="field-value">${data.code_no || ''}</div></div>
+                <div class="field-item"><div class="field-label">Family No.:</div><div class="field-value">${data.family_no || ''}</div></div>
+                <div class="field-item"><div class="field-label">NHTS Member/Head:</div><div class="field-value">${data.NHTS_member_head || ''}</div></div>
+                <div class="field-item"><div class="field-label">DOB (Head):</div><div class="field-value">${data.DOB_head || ''}</div></div>
+                <div class="field-item"><div class="field-label">Relationship:</div><div class="field-value">${data.relationship_to_household_head || ''}</div></div>
+                <div class="field-item"><div class="field-label">PhilHealth Member:</div><div class="field-value">${data.PhilHealth_member || ''}</div></div>
+                <div class="field-item"><div class="field-label">PhilHealth No.:</div><div class="field-value">${data.PhilHealth_no || ''}</div></div>
+                <div class="field-item"><div class="field-label">Mother's Maiden Name:</div><div class="field-value">${data.mother_maiden_name || ''}</div></div>
+            </div>
+        </div>
+
+        <div class="view-record-section">
+            <div class="view-grid">
+                <div class="field-item"><div class="field-label">Name:</div><div class="field-value">${data.name || ''}</div></div>
+                <div class="field-item"><div class="field-label">DOB:</div><div class="field-value">${data.DOB || ''}</div></div>
+                <div class="field-item"><div class="field-label">Age:</div><div class="field-value">${data.age || ''}</div></div>
+                <div class="field-item"><div class="field-label">Sex:</div><div class="field-value">${data.sex || ''}</div></div>
+                <div class="field-item"><div class="field-label">Status:</div><div class="field-value">${data.status || ''}</div></div>
+            </div>
+
+            <div class="field-item" style="margin-top:15px;">
+                <div class="field-label">Address:</div>
+                <div class="field-value">${data.address || ''}</div>
+            </div>
+
+            <div class="view-grid" style="margin-top:15px;">
+                <div class="field-item"><div class="field-label">Hx. of Allergies:</div><div class="field-value">${data.hx_of_allergies || ''}</div></div>
+                <div class="field-item"><div class="field-label">Blood Type:</div><div class="field-value">${data.blood_type || ''}</div></div>
+                <div class="field-item"><div class="field-label">Date Recorded:</div><div class="field-value">${data.date_recorded || ''}</div></div>
+                <div class="field-item"><div class="field-label">BP:</div><div class="field-value">${data.BP || ''}</div></div>
+                <div class="field-item"><div class="field-label">Temp:</div><div class="field-value">${data.temp || ''}</div></div>
+                <div class="field-item"><div class="field-label">Weight (kg):</div><div class="field-value">${data.weight || ''}</div></div>
+                <div class="field-item"><div class="field-label">RR:</div><div class="field-value">${data.RR || ''}</div></div>
+                <div class="field-item"><div class="field-label">PR:</div><div class="field-value">${data.PR || ''}</div></div>
+                <div class="field-item"><div class="field-label">Height (cm):</div><div class="field-value">${data.height || ''}</div></div>
+            </div>
+        </div>
+    `;
+
+    // Show modal
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+}
+
+/**
+ * Close modal
+ */
+function closeModal() {
+    const modal = document.getElementById('patientModal');
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+}
+
+/* Close modal when clicking outside content */
+document.getElementById('patientModal').addEventListener('click', function (e) {
+    if (e.target === this) closeModal();
+});
+
+/* Close on Escape */
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeModal();
+});
+
+/* Search */
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('searchInput');
+    const rows = document.querySelectorAll('.table-container tbody tr');
+    input.addEventListener('keyup', function () {
+        const filter = this.value.toLowerCase();
+        rows.forEach(row => {
+            const id = (row.cells[0] && row.cells[0].textContent || '').toLowerCase();
+            const name = (row.cells[1] && row.cells[1].textContent || '').toLowerCase();
+            row.style.display = (id.includes(filter) || name.includes(filter)) ? '' : 'none';
+        });
+    });
+});
+
+/* PDF download */
+document.getElementById('download-pdf').addEventListener('click', function () {
+    const element = document.getElementById('modalContent');
+
+    // Replace spaces with underscores for filename
+    const patientName = (typeof data !== 'undefined' && data.name) 
+        ? data.name.replace(/\s+/g, '_') 
+        : 'health_record';
+
+    const opt = {
+        margin: 0.5,
+        filename: `health_record.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save();
+});
+
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</body>
+</html>
