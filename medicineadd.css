@@ -36,7 +36,7 @@ body {
   height: calc(100% - 70px);
   background-color: #57cba7;
   color: white;
-  padding: 25px 20px;
+  padding: 25px 10px;
 }
 
 .sidebar ul {
