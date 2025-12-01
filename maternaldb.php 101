@@ -1,0 +1,254 @@
+<?php
+session_start();
+
+// Prevent browser caching
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: 0");
+
+// Block access if not logged in
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit();
+}
+
+include 'db_connect.php'; // your DB connection
+
+// Fetch maternal records
+$query = "SELECT * FROM maternal_records ORDER BY id DESC";
+$result = mysqli_query($conn, $query);
+$total_patients = mysqli_num_rows($result);
+
+// Store all records in an array for modal
+$patients = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $patients[] = $row;
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maternal Dashboard | RHU Management System</title>
+
+<!-- Ionicons -->
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+<!-- CSS -->
+<link rel="stylesheet" href="maternaldb.css">
+
+<style>
+/* Modal styling */
+.modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:2000;}
+.modal-content {background:#fff; border-radius:12px; padding:30px; width:90%; max-width:1000px; max-height:90%; overflow-y:auto; position:relative;}
+.close-btn {position:absolute; top:15px; right:15px; background:#e74c3c; color:#fff; border:none; padding:5px 10px; border-radius:8px; cursor:pointer;}
+.view-record-section {border:1px solid #b5e3da; border-radius:8px; padding:20px; margin-bottom:20px;}
+.view-grid {display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px 30px; margin-top:10px;}
+.field-item {margin-bottom:5px;}
+.field-label {font-size:13px; font-weight:500; color:#668b83;}
+.field-value {font-size:15px; font-weight:600; color:#244a42; margin-top:2px;}
+</style>
+
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+<h1>Maternal Management System</h1>
+</header>
+
+<!-- Sidebar -->
+<div class="sidebar">
+<ul>
+<li><a href="homepage.php"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+<li><a href="#" class="active"><ion-icon name="grid-outline"></ion-icon> Dashboard</a></li>
+<li><a href="maternaladd.php"><ion-icon name="person-add-outline"></ion-icon> Add Patient</a></li>
+</ul>
+</div>
+
+<main class="main">
+<section class="content">
+<h2>LIST OF PATIENT</h2>
+
+<div class="top-bar">
+    <div class="search-box">
+        <ion-icon name="search-outline"></ion-icon>
+        <input type="text" placeholder="Search patient..." id="searchInput">
+    </div>
+
+    <div class="total">
+        <span>Total Patients:</span>
+        <div class="count"><?php echo $total_patients; ?></div>
+    </div>
+</div>
+
+<div class="table-container">
+<table id="patientTable">
+<thead>
+<tr>
+<th>File No.</th>
+<th>Name (Last, First M.)</th>
+<th>Age</th>
+<th>Date</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<?php foreach($patients as $row):
+    $middleInitial = $row['maiden_middle_name'] ? strtoupper(substr($row['maiden_middle_name'],0,1)) . "." : "";
+?>
+<tr>
+<td><?php echo $row['id']; ?></td>
+<td><?php echo $row['maiden_family_name'] . ", " . $row['maiden_first_name'] . " " . $middleInitial; ?></td>
+<td><?php echo $row['age']; ?></td>
+<td><?php echo date("Y-m-d", strtotime($row['created_at'])); ?></td>
+<td>
+<button class="view-btn" onclick='openModal(<?php echo json_encode($row); ?>)'>View</button>
+</td>
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
+</div>
+
+<!-- Modal -->
+<div class="modal" id="patientModal">
+  <div class="modal-content" id="modalContent">
+    <button class="close-btn" onclick="closeModal()">Close</button>
+    <div id="patientData"></div>
+    <button id="download-pdf" style="margin-top:15px; padding:8px 15px; border:none; border-radius:6px; background:#1e8c72; color:#fff; cursor:pointer;">
+      <ion-icon name="download-outline"></ion-icon> Download PDF
+    </button>
+  </div>
+</div>
+
+</section>
+</main>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+function openModal(data) {
+    const modal = document.getElementById('patientModal');
+    const container = document.getElementById('patientData');
+
+    container.innerHTML = `
+    <div class="view-record-section"><legend>1. Mother’s Identification & Vitals</legend>
+        <div class="view-grid">
+            <div class="field-item"><div class="field-label">Family Number:</div><div class="field-value">${data.family_number}</div></div>
+            <div class="field-item"><div class="field-label">NHTS Status:</div><div class="field-value">${data.nhts_status}</div></div>
+            <div class="field-item"><div class="field-label">Code No.:</div><div class="field-value">${data.code_no}</div></div>
+            <div class="field-item"><div class="field-label">PhilHealth No.:</div><div class="field-value">${data.philhealth_no}</div></div>
+            <div class="field-item"><div class="field-label">Civil Status:</div><div class="field-value">${data.civil_status}</div></div>
+            <div class="field-item"><div class="field-label">Contact No.:</div><div class="field-value">${data.contact_no}</div></div>
+            <div class="field-item"><div class="field-label">Clinic Name:</div><div class="field-value">${data.clinic_name}</div></div>
+            <div class="field-item"><div class="field-label">Maiden Name:</div><div class="field-value">${data.maiden_family_name} ${data.maiden_first_name} ${data.maiden_middle_name || ''}</div></div>
+            <div class="field-item"><div class="field-label">Age:</div><div class="field-value">${data.age}</div></div>
+            <div class="field-item"><div class="field-label">Address:</div><div class="field-value">${data.address}</div></div>
+            <div class="field-item"><div class="field-label">DOB:</div><div class="field-value">${data.dob}</div></div>
+            <div class="field-item"><div class="field-label">Occupation:</div><div class="field-value">${data.occupation}</div></div>
+            <div class="field-item"><div class="field-label">Height:</div><div class="field-value">${data.height}</div></div>
+            <div class="field-item"><div class="field-label">BMI:</div><div class="field-value">${data.bmi}</div></div>
+            <div class="field-item"><div class="field-label">MUAC:</div><div class="field-value">${data.muac}</div></div>
+        </div>
+    </div>
+
+    <div class="view-record-section"><legend>2. Husband’s Information</legend>
+        <div class="view-grid">
+            <div class="field-item"><div class="field-label">Family:</div><div class="field-value">${data.husband_family}</div></div>
+            <div class="field-item"><div class="field-label">First Name:</div><div class="field-value">${data.husband_first}</div></div>
+            <div class="field-item"><div class="field-label">Middle Name:</div><div class="field-value">${data.husband_middle}</div></div>
+            <div class="field-item"><div class="field-label">Occupation:</div><div class="field-value">${data.husband_occupation}</div></div>
+        </div>
+    </div>
+
+    <div class="view-record-section"><legend>3. Obstetrical History & Complications</legend>
+        <div class="view-grid">
+            <div class="field-item"><div class="field-label">Children Alive:</div><div class="field-value">${data.children_alive}</div></div>
+            <div class="field-item"><div class="field-label">Living Children:</div><div class="field-value">${data.living_children}</div></div>
+            <div class="field-item"><div class="field-label">Abortions:</div><div class="field-value">${data.abortions}</div></div>
+            <div class="field-item"><div class="field-label">Stillbirth Count:</div><div class="field-value">${data.stillbirth_count}</div></div>
+        </div>
+        <div class="view-grid1">
+            <label><input type="checkbox" disabled ${data.complication_hemorrhage == 1 ? 'checked' : ''}> Hemorrhage</label>
+            <label><input type="checkbox" disabled ${data.complication_toxemia == 1 ? 'checked' : ''}> Toxemia</label>
+            <label><input type="checkbox" disabled ${data.complication_placenta_previa == 1 ? 'checked' : ''}> Placenta Previa</label>
+            <label><input type="checkbox" disabled ${data.complication_sepsis == 1? 'checked' : ''}> Sepsis</label>
+            <label><input type="checkbox" disabled ${data.complication_hypertension == 1? 'checked' : ''}> Hypertension</label>
+        </div>
+    </div>
+
+    <div class="view-record-section"><legend>4. Current Signs & Symptoms</legend>
+        <div class="view-grid1">
+            <label><input type="checkbox" disabled ${data.symptom_nausea == 1 ? 'checked' : ''}> Nausea</label>
+            <label><input type="checkbox" disabled ${data.symptom_vomiting == 1? 'checked' : ''}> Vomiting</label>
+            <label><input type="checkbox" disabled ${data.symptom_headache == 1 ? 'checked' : ''}> Headache</label>
+            <label><input type="checkbox" disabled ${data.symptom_dizziness == 1? 'checked' : ''}> Dizziness</label>
+            <label><input type="checkbox" disabled ${data.symptom_leucorrhea == 1? 'checked' : ''}> Leucorrhea</label>
+            <label><input type="checkbox" disabled ${data.symptom_edema == 1 ? 'checked' : ''}> Edema</label>
+            <label><input type="checkbox" disabled ${data.symptom_cramps == 1 ? 'checked' : ''}> Cramps</label>
+            <label><input type="checkbox" disabled ${data.symptom_bleeding == 1 ? 'checked' : ''}> Bleeding</label>
+            <label><input type="checkbox" disabled ${data.symptom_pruritis == 1 ? 'checked' : ''}> Pruritis</label>
+            <label><input type="checkbox" disabled ${data.symptom_blurring == 1 ? 'checked' : ''}> Blurring</label>
+        </div>
+    </div>
+
+    <div class="view-record-section"><legend>5. Dietary & Delivery Info</legend>
+        <div class="view-grid">
+            <div class="field-item"><div class="field-label">Food Regular:</div><div class="field-value">${data.food_regular}</div></div>
+            <div class="field-item"><div class="field-label">Food Avoided:</div><div class="field-value">${data.food_avoided}</div></div>
+            <div class="field-item"><div class="field-label">Pregnancy Stage:</div><div class="field-value">${data.preg_stage}</div></div>
+            <div class="field-item"><div class="field-label">Prepared BF:</div><div class="field-value">${data.prepared_bf}</div></div>
+            <div class="field-item"><div class="field-label">Reason not prepared:</div><div class="field-value">${data.not_prepared_reason}</div></div>
+            <div class="field-item"><div class="field-label">Delivery Date:</div><div class="field-value">${data.delivery_date}</div></div>
+            <div class="field-item"><div class="field-label">Delivery Type:</div><div class="field-value">${data.delivery_type}</div></div>
+            <div class="field-item"><div class="field-label">Delivery Place:</div><div class="field-value">${data.delivery_place}</div></div>
+            <div class="field-item"><div class="field-label">Attended By:</div><div class="field-value">${data.attended_by}</div></div>
+            <div class="field-item"><div class="field-label">Designation:</div><div class="field-value">${data.designation}</div></div>
+            <div class="field-item"><div class="field-label">Delivery Address:</div><div class="field-value">${data.delivery_address}</div></div>
+        </div>
+    </div>
+
+    <div class="view-record-section"><legend>6. Ante-partum (GTPAL) & Lab Data</legend>
+        <div class="view-grid">
+            <div class="field-item"><div class="field-label">LMP:</div><div class="field-value">${data.lmp}</div></div>
+            <div class="field-item"><div class="field-label">EDC:</div><div class="field-value">${data.edc}</div></div>
+            <div class="field-item"><div class="field-label">Risk Code:</div><div class="field-value">${data.risk_code}</div></div>
+            <div class="field-item"><div class="field-label">Deworming:</div><div class="field-value">${data.deworming}</div></div>
+            <div class="field-item"><div class="field-label">Gravida:</div><div class="field-value">${data.gravida}</div></div>
+            <div class="field-item"><div class="field-label">Term:</div><div class="field-value">${data.term}</div></div>
+            <div class="field-item"><div class="field-label">Para:</div><div class="field-value">${data.para}</div></div>
+            <div class="field-item"><div class="field-label">Abortion:</div><div class="field-value">${data.abortion}</div></div>
+        </div>
+    </div>
+    `;
+
+    modal.style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('patientModal').style.display = 'none';
+}
+
+// Search filter
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    let filter = this.value.toLowerCase();
+    let rows = document.querySelectorAll('#patientTable tbody tr');
+    rows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+    });
+});
+
+// PDF download
+document.getElementById('download-pdf').addEventListener('click', function () {
+    const element = document.getElementById('modalContent');
+    const opt = { margin:0.5, filename:'maternal_record.pdf', image:{type:'jpeg', quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'in', format:'letter', orientation:'portrait'}};
+    html2pdf().set(opt).from(element).save();
+});
+</script>
+
+</body>
+</html>
