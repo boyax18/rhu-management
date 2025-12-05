@@ -1,0 +1,504 @@
+<?php
+session_start();
+
+// Prevent browser caching
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: 0");
+
+// Block access if not logged in
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit();
+}
+
+include 'db_connect.php';
+
+// Helper functions
+function checkbox($name) {
+    return isset($_POST[$name]) ? 1 : 0;
+}
+
+function null_if_empty($val) {
+    $val = trim($val ?? '');
+    return $val === '' ? NULL : $val;
+}
+
+$message = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // SECTION 1
+    $family_number = null_if_empty($_POST['family_number']);
+    $nhts_status = null_if_empty($_POST['nhts_status']);
+    $code_no = null_if_empty($_POST['code_no']);
+    $philhealth_no = null_if_empty($_POST['philhealth_no']);
+    $civil_status = null_if_empty($_POST['civil_status']);
+    $contact_no = null_if_empty($_POST['contact_no']);
+    $clinic_name = null_if_empty($_POST['clinic_name']);
+    $maiden_family_name = null_if_empty($_POST['maiden_family_name']);
+    $maiden_first_name = null_if_empty($_POST['maiden_first_name']);
+    $maiden_middle_name = null_if_empty($_POST['maiden_middle_name']);
+    $age = null_if_empty($_POST['age']);
+    $address = null_if_empty($_POST['address']);
+    $dob = null_if_empty($_POST['dob']);
+    $occupation = null_if_empty($_POST['occupation']);
+    $height = null_if_empty($_POST['height']);
+    $bmi = null_if_empty($_POST['bmi']);
+    $muac = null_if_empty($_POST['muac']);
+
+    // SECTION 2
+    $husband_family = null_if_empty($_POST['husband_family']);
+    $husband_first = null_if_empty($_POST['husband_first']);
+    $husband_middle = null_if_empty($_POST['husband_middle']);
+    $husband_occupation = null_if_empty($_POST['husband_occupation']);
+
+    // SECTION 3
+    $children_alive = null_if_empty($_POST['children_alive']);
+    $living_children = null_if_empty($_POST['living_children']);
+    $abortions = null_if_empty($_POST['abortions']);
+    $stillbirth_count = null_if_empty($_POST['stillbirth_count']);
+
+    $complication_hemorrhage = checkbox('complication_hemorrhage');
+    $complication_toxemia = checkbox('complication_toxemia');
+    $complication_placenta_previa = checkbox('complication_placenta_previa');
+    $complication_sepsis = checkbox('complication_sepsis');
+    $complication_hypertension = checkbox('complication_hypertension');
+
+    // SECTION 4
+    $symptom_nausea = checkbox('symptom_nausea');
+    $symptom_vomiting = checkbox('symptom_vomiting');
+    $symptom_headache = checkbox('symptom_headache');
+    $symptom_dizziness = checkbox('symptom_dizziness');
+    $symptom_leucorrhea = checkbox('symptom_leucorrhea');
+    $symptom_edema = checkbox('symptom_edema');
+    $symptom_cramps = checkbox('symptom_cramps');
+    $symptom_bleeding = checkbox('symptom_bleeding');
+    $symptom_pruritis = checkbox('symptom_pruritis');
+    $symptom_blurring = checkbox('symptom_blurring');
+
+    // SECTION 5
+    $food_regular = null_if_empty($_POST['food_regular']);
+    $food_avoided = null_if_empty($_POST['food_avoided']);
+    $preg_stage = null_if_empty($_POST['preg_stage']);
+    $prepared_bf = $_POST['prepared_bf'] ?? NULL;
+    $not_prepared_reason = null_if_empty($_POST['not_prepared_reason']);
+
+    $delivery_date = null_if_empty($_POST['delivery_date']);
+    $delivery_type = null_if_empty($_POST['delivery_type']);
+    $delivery_place = null_if_empty($_POST['delivery_place']);
+    $attended_by = null_if_empty($_POST['attended_by']);
+    $designation = null_if_empty($_POST['designation']);
+    $delivery_address = null_if_empty($_POST['delivery_address']);
+
+    // SECTION 6
+    $lmp = null_if_empty($_POST['lmp']);
+    $edc = null_if_empty($_POST['edc']);
+    $risk_code = null_if_empty($_POST['risk_code']);
+    $deworming = null_if_empty($_POST['deworming']);
+    $gravida = null_if_empty($_POST['gravida']);
+    $term = null_if_empty($_POST['term']);
+    $para = null_if_empty($_POST['para']);
+    $abortion = null_if_empty($_POST['abortion']);
+
+    // Prepare MySQLi statement
+    $stmt = $conn->prepare("INSERT INTO maternal_records (
+        family_number, nhts_status, code_no, philhealth_no, civil_status, contact_no, clinic_name,
+        maiden_family_name, maiden_first_name, maiden_middle_name, age, address, dob, occupation,
+        height, bmi, muac, husband_family, husband_first, husband_middle, husband_occupation,
+        children_alive, living_children, abortions, stillbirth_count,
+        complication_hemorrhage, complication_toxemia, complication_placenta_previa, complication_sepsis, complication_hypertension,
+        symptom_nausea, symptom_vomiting, symptom_headache, symptom_dizziness, symptom_leucorrhea, symptom_edema, symptom_cramps,
+        symptom_bleeding, symptom_pruritis, symptom_blurring,
+        food_regular, food_avoided, preg_stage, prepared_bf, not_prepared_reason,
+        delivery_date, delivery_type, delivery_place, attended_by, designation, delivery_address,
+        lmp, edc, risk_code, deworming, gravida, term, para, abortion
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+	
+$stmt->bind_param(
+   "ssssssssssissssssssssiiiiiiiiiiiiiiiiiiisssssssssssssssiiii",
+    $family_number, $nhts_status, $code_no, $philhealth_no, $civil_status, $contact_no, $clinic_name,
+    $maiden_family_name, $maiden_first_name, $maiden_middle_name, $age, $address, $dob, $occupation,
+    $height, $bmi, $muac, $husband_family, $husband_first, $husband_middle, $husband_occupation,
+    $children_alive, $living_children, $abortions, $stillbirth_count,
+    $complication_hemorrhage, $complication_toxemia, $complication_placenta_previa, $complication_sepsis, $complication_hypertension,
+    $symptom_nausea, $symptom_vomiting, $symptom_headache, $symptom_dizziness, $symptom_leucorrhea, $symptom_edema, $symptom_cramps,
+    $symptom_bleeding, $symptom_pruritis, $symptom_blurring,
+    $food_regular, $food_avoided, $preg_stage, $prepared_bf, $not_prepared_reason,
+    $delivery_date, $delivery_type, $delivery_place, $attended_by, $designation, $delivery_address,
+    $lmp, $edc, $risk_code, $deworming, $gravida, $term, $para, $abortion
+);
+
+
+    if ($stmt->execute()) {
+        header("Location: maternaldb.php?success=1");
+        exit();
+    } else {
+        $message = "Error saving record: " . $stmt->error;
+    }
+
+    $stmt->close();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Maternal Health Record | RHU Management System</title>
+
+  <!-- Ionicons -->
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="maternaladd.css" />
+</head>
+
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <h1>Maternal Health Management System</h1>
+  </header>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <ul>
+      <li><a href="homepage.php"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+      <li><a href="maternaldb.php"><ion-icon name="grid-outline"></ion-icon> Dashboard</a></li>
+      <li><a href="#" class="active"><ion-icon name="person-add-outline"></ion-icon> Add Patient</a></li>
+    </ul>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <section class="content">
+
+      <legend>👩‍🍼 Maternal Health Record</legend>
+
+<form class="fillup_form" method="POST" action="maternaladd.php">
+
+  <!-- SECTION 1 -->
+ <fieldset>
+  <legend>1. Mother’s Identification & Vitals</legend>
+
+  <div class="form-grid">
+
+    <div>
+      <label>Family Number:</label>
+      <input type="text" name="family_number" required>
+    </div>
+
+   <div>
+  <label>NHTS / 4Ps Status:</label>
+  <select name="nhts_status" required>
+    <option value="">Select Status</option>
+    <option value="NHTS">NHTS</option>
+    <option value="4Ps">4Ps</option>
+    <option value="N/A">N/A</option>
+  </select>
+</div>
+
+   <div>
+  <label>Code No.:</label>
+  <input type="number" name="code_no" required
+         oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+         inputmode="numeric" pattern="[0-9]*">
+</div>
+
+  <div>
+  <label>PhilHealth No.:</label>
+  <input type="number" name="philhealth_no" required
+         oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+         inputmode="numeric" pattern="[0-9]*">
+ </div>
+	  
+    <div>
+      <label>Civil Status:</label>
+      <select name="civil_status" required>
+        <option value="">Select Status</option>
+        <option>Single</option>
+        <option>Married</option>
+        <option>Widowed</option>
+        <option>Separated</option>
+        <option>Live-in</option>
+      </select>
+    </div>
+
+  <div>
+  <label>Contact No.:</label>
+  <input type="tel" name="contact_no" required
+         inputmode="numeric"
+         pattern="[0-9]{7,11}"
+         minlength="7"
+         maxlength="11"
+         oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+         placeholder="7 to 11 digits">
+</div>
+
+
+    <div>
+      <label>Name of Clinic:</label>
+      <input type="text" name="clinic_name" required>
+    </div>
+
+    <div>
+      <label>Maiden Family Name:</label>
+      <input type="text" name="maiden_family_name" required oninput="capitalize(this)">
+    </div>
+
+    <div>
+      <label>Maiden First Name:</label>
+      <input type="text" name="maiden_first_name" required oninput="capitalize(this)">
+    </div>
+
+    <div>
+      <label>Maiden Middle Name:</label>
+      <input type="text" name="maiden_middle_name" required oninput="capitalize(this)">
+    </div>
+
+    <div>
+  <label>Age:</label>
+  <input type="number" name="age" required min="1" max="120" step="1" placeholder="Enter age in years">
+</div>
+
+
+  <div>
+  <label>Province:</label>
+  <select id="province" name="province" required>
+    <option disabled selected>Select Province</option>
+  </select>
+</div>
+
+<div>
+  <label>Municipality / City:</label>
+  <select id="municipality" name="municipality" required disabled>
+    <option disabled selected>Select Municipality / City</option>
+  </select>
+</div>
+
+<div>
+  <label>Barangay:</label>
+  <select id="barangay" name="barangay" required disabled>
+    <option disabled selected>Select Barangay</option>
+  </select>
+</div>
+
+    <div>
+      <label>Date of Birth:</label>
+      <input type="date" name="dob" required>
+    </div>
+
+    <div>
+      <label>Occupation:</label>
+      <input type="text" name="occupation" required>
+    </div>
+
+    <div>
+      <label>Height (m):</label>
+      <input type="number" name="height" required step="0.01" min="0">
+    </div>
+
+    <div>
+      <label>BMI:</label>
+      <input type="number" name="bmi" required step="0.01" min="0">
+    </div>
+
+    <div>
+      <label>MUAC (cm):</label>
+      <input type="number" name="muac" required step="0.01" min="0">
+    </div>
+
+  </div>
+</fieldset>
+	
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const provinceSelect = document.getElementById("province");
+  const municipalitySelect = document.getElementById("municipality");
+  const barangaySelect = document.getElementById("barangay");
+
+  fetch("https://psgc.gitlab.io/api/provinces/")
+    .then(res => res.json())
+    .then(data => {
+      data.sort((a,b)=>a.name.localeCompare(b.name));
+      provinceSelect.innerHTML = '<option disabled selected>Select Province</option>';
+      data.forEach(item => {
+        const opt = document.createElement("option");
+        opt.value = item.code;
+        opt.textContent = item.name;
+        provinceSelect.appendChild(opt);
+      });
+    });
+
+  provinceSelect.addEventListener("change", () => {
+    const code = provinceSelect.value;
+    municipalitySelect.innerHTML = '<option disabled selected>Loading...</option>';
+    municipalitySelect.disabled = true;
+    barangaySelect.innerHTML = '<option disabled selected>Select Barangay</option>';
+    barangaySelect.disabled = true;
+
+    fetch(`https://psgc.gitlab.io/api/provinces/${code}/cities-municipalities/`)
+      .then(res => res.json())
+      .then(data => {
+        data.sort((a,b)=>a.name.localeCompare(b.name));
+        municipalitySelect.innerHTML = '<option disabled selected>Select Municipality / City</option>';
+        data.forEach(item => {
+          const opt = document.createElement("option");
+          opt.value = item.code;
+          opt.textContent = item.name;
+          municipalitySelect.appendChild(opt);
+        });
+        municipalitySelect.disabled = false;
+      });
+  });
+
+  municipalitySelect.addEventListener("change", () => {
+    const code = municipalitySelect.value;
+    barangaySelect.innerHTML = '<option disabled selected>Loading...</option>';
+    barangaySelect.disabled = true;
+
+    fetch(`https://psgc.gitlab.io/api/cities-municipalities/${code}/barangays/`)
+      .then(res => res.json())
+      .then(data => {
+        data.sort((a,b)=>a.name.localeCompare(b.name));
+        barangaySelect.innerHTML = '<option disabled selected>Select Barangay</option>';
+        data.forEach(item => {
+          const opt = document.createElement("option");
+          opt.value = item.code;
+          opt.textContent = item.name;
+          barangaySelect.appendChild(opt);
+        });
+        barangaySelect.disabled = false;
+      });
+  });
+});
+</script>
+
+<script>
+function capitalize(input) {
+  input.value = input.value.replace(/\b\w/g, c => c.toUpperCase());
+}
+</script>
+
+
+  <!-- SECTION 2 -->
+  <fieldset>
+    <legend>2. Husband’s Information</legend>
+
+    <div class="form-grid">
+      <div><label>Family Name:</label><input type="text" name="husband_family"></div>
+      <div><label>First Name:</label><input type="text" name="husband_first"></div>
+      <div><label>Middle Name:</label><input type="text" name="husband_middle"></div>
+      <div><label>Occupation:</label><input type="text" name="husband_occupation"></div>
+    </div>
+  </fieldset>
+
+  <!-- SECTION 3 -->
+  <fieldset>
+    <legend>3. Obstetrical History & Complications</legend>
+
+    <div class="form-grid">
+      <div><label>No. of Children Alive:</label><input type="number" name="children_alive"></div>
+      <div><label>Living Children:</label><input type="number" name="living_children"></div>
+      <div><label>No. of Abortion:</label><input type="number" name="abortions"></div>
+      <div><label>No. of Stillbirth:</label><input type="number" name="stillbirth_count"></div>
+    </div>
+
+    <!-- CHECKBOXES -->
+    <div class="checkbox-group">
+      <label><input type="checkbox" name="complication_hemorrhage"> Hemorrhage</label>
+      <label><input type="checkbox" name="complication_toxemia"> Toxemia</label>
+      <label><input type="checkbox" name="complication_placenta_previa"> Placenta Previa</label>
+      <label><input type="checkbox" name="complication_sepsis"> Sepsis</label>
+      <label><input type="checkbox" name="complication_hypertension"> Hypertension</label>
+    </div>
+  </fieldset>
+
+  <!-- SECTION 4 -->
+  <fieldset>
+    <legend>4. Current Signs and Symptoms</legend>
+
+    <div class="checkbox-group">
+      <label><input type="checkbox" name="symptom_nausea"> Nausea</label>
+      <label><input type="checkbox" name="symptom_vomiting"> Vomiting</label>
+      <label><input type="checkbox" name="symptom_headache"> Headache</label>
+      <label><input type="checkbox" name="symptom_dizziness"> Dizziness</label>
+      <label><input type="checkbox" name="symptom_leucorrhea"> Leucorrhea</label>
+      <label><input type="checkbox" name="symptom_edema"> Edema</label>
+      <label><input type="checkbox" name="symptom_cramps"> Cramps</label>
+      <label><input type="checkbox" name="symptom_bleeding"> Bleeding</label>
+      <label><input type="checkbox" name="symptom_pruritis"> Pruritis</label>
+      <label><input type="checkbox" name="symptom_blurring"> Blurring</label>
+    </div>
+  </fieldset>
+
+  <!-- SECTION 5 -->
+  <fieldset>
+    <legend>5. Dietary Pattern, Preparation & Delivery Info</legend>
+
+    <div class="form-grid">
+      <div><label>Food Regularly Taken:</label><input type="text" name="food_regular"></div>
+      <div><label>Food Avoided:</label><input type="text" name="food_avoided"></div>
+    </div>
+
+    <div class="form-grid">
+      <div>
+        <label>A. Ante-partum / B. Post-partum:</label>
+        <select name="preg_stage">
+          <option value="">Select</option>
+          <option value="Ante-partum">Ante-partum</option>
+          <option value="Post-partum">Post-partum</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Prepared for Breastfeeding?</label>
+        <div class="radio-group">
+          <label><input type="radio" name="prepared_bf" value="Yes"> Yes</label>
+          <label><input type="radio" name="prepared_bf" value="No"> No</label>
+        </div>
+      </div>
+
+      <div>
+        <label>Reason if not prepared:</label>
+        <input type="text" name="not_prepared_reason">
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div><label>Date of Delivery:</label><input type="date" name="delivery_date"></div>
+      <div><label>Type of Delivery:</label><input type="text" name="delivery_type"></div>
+      <div><label>Place of Delivery:</label><input type="text" name="delivery_place"></div>
+      <div><label>Attended By:</label><input type="text" name="attended_by"></div>
+      <div><label>Designation:</label><input type="text" name="designation"></div>
+      <div style="grid-column: span 3;"><label>Delivery Address:</label><input type="text" name="delivery_address"></div>
+    </div>
+  </fieldset>
+
+  <!-- SECTION 6 -->
+  <fieldset>
+    <legend>6. Ante-partum (GTPAL) & Lab Data</legend>
+
+    <div class="form-grid">
+      <div><label>LMP:</label><input type="date" name="lmp"></div>
+      <div><label>EDC:</label><input type="date" name="edc"></div>
+      <div><label>Risk Code:</label><input type="text" name="risk_code"></div>
+      <div><label>Deworming:</label><input type="text" name="deworming"></div>
+      <div><label>Gravida:</label><input type="number" name="gravida"></div>
+      <div><label>Term:</label><input type="number" name="term"></div>
+      <div><label>Para:</label><input type="number" name="para"></div>
+      <div><label>Abortion:</label><input type="number" name="abortion"></div>
+    </div>
+  </fieldset>
+
+  <button type="submit" class="submit-btn">Save Record</button>
+
+</form>
+
+    </section>
+  </main>
+
+</body>
+</html>
