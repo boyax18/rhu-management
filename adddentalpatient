@@ -1,0 +1,491 @@
+<?php
+session_start();
+include 'db_connect.php'; // must create $conn = new mysqli(...)
+
+// Redirect if not logged in
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Create table if not exists -------------------------------------------------
+$create_sql = "
+CREATE TABLE IF NOT EXISTS dental_patients (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    created_by VARCHAR(150) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    -- personal
+    surname VARCHAR(150),
+    firstname VARCHAR(150),
+    middle_initial VARCHAR(10),
+    file_no VARCHAR(100),
+    dob DATE,
+    sex VARCHAR(10),
+    city VARCHAR(150),
+    province VARCHAR(150),
+    hospital VARCHAR(150),
+    patient_type VARCHAR(100),
+    category VARCHAR(200),
+    address VARCHAR(255),
+    occupation VARCHAR(150),
+
+    -- dental chart: store small codes (allow up to 5 chars)
+    -- child upper 51-55 & 61-65
+    operation_51 VARCHAR(5), treatment_51 VARCHAR(5),
+    operation_52 VARCHAR(5), treatment_52 VARCHAR(5),
+    operation_53 VARCHAR(5), treatment_53 VARCHAR(5),
+    operation_54 VARCHAR(5), treatment_54 VARCHAR(5),
+    operation_55 VARCHAR(5), treatment_55 VARCHAR(5),
+    operation_61 VARCHAR(5), treatment_61 VARCHAR(5),
+    operation_62 VARCHAR(5), treatment_62 VARCHAR(5),
+    operation_63 VARCHAR(5), treatment_63 VARCHAR(5),
+    operation_64 VARCHAR(5), treatment_64 VARCHAR(5),
+    operation_65 VARCHAR(5), treatment_65 VARCHAR(5),
+
+    -- adult upper 11-18 & 21-28
+    operation_11 VARCHAR(5), treatment_11 VARCHAR(5),
+    operation_12 VARCHAR(5), treatment_12 VARCHAR(5),
+    operation_13 VARCHAR(5), treatment_13 VARCHAR(5),
+    operation_14 VARCHAR(5), treatment_14 VARCHAR(5),
+    operation_15 VARCHAR(5), treatment_15 VARCHAR(5),
+    operation_16 VARCHAR(5), treatment_16 VARCHAR(5),
+    operation_17 VARCHAR(5), treatment_17 VARCHAR(5),
+    operation_18 VARCHAR(5), treatment_18 VARCHAR(5),
+    operation_21 VARCHAR(5), treatment_21 VARCHAR(5),
+    operation_22 VARCHAR(5), treatment_22 VARCHAR(5),
+    operation_23 VARCHAR(5), treatment_23 VARCHAR(5),
+    operation_24 VARCHAR(5), treatment_24 VARCHAR(5),
+    operation_25 VARCHAR(5), treatment_25 VARCHAR(5),
+    operation_26 VARCHAR(5), treatment_26 VARCHAR(5),
+    operation_27 VARCHAR(5), treatment_27 VARCHAR(5),
+    operation_28 VARCHAR(5), treatment_28 VARCHAR(5),
+
+    -- lower adult 31-38 & 41-48
+    operation_31 VARCHAR(5), treatment_31 VARCHAR(5),
+    operation_32 VARCHAR(5), treatment_32 VARCHAR(5),
+    operation_33 VARCHAR(5), treatment_33 VARCHAR(5),
+    operation_34 VARCHAR(5), treatment_34 VARCHAR(5),
+    operation_35 VARCHAR(5), treatment_35 VARCHAR(5),
+    operation_36 VARCHAR(5), treatment_36 VARCHAR(5),
+    operation_37 VARCHAR(5), treatment_37 VARCHAR(5),
+    operation_38 VARCHAR(5), treatment_38 VARCHAR(5),
+    operation_41 VARCHAR(5), treatment_41 VARCHAR(5),
+    operation_42 VARCHAR(5), treatment_42 VARCHAR(5),
+    operation_43 VARCHAR(5), treatment_43 VARCHAR(5),
+    operation_44 VARCHAR(5), treatment_44 VARCHAR(5),
+    operation_45 VARCHAR(5), treatment_45 VARCHAR(5),
+    operation_46 VARCHAR(5), treatment_46 VARCHAR(5),
+    operation_47 VARCHAR(5), treatment_47 VARCHAR(5),
+    operation_48 VARCHAR(5), treatment_48 VARCHAR(5),
+
+    -- child lower 71-75 & 81-85
+    operation_71 VARCHAR(5), treatment_71 VARCHAR(5),
+    operation_72 VARCHAR(5), treatment_72 VARCHAR(5),
+    operation_73 VARCHAR(5), treatment_73 VARCHAR(5),
+    operation_74 VARCHAR(5), treatment_74 VARCHAR(5),
+    operation_75 VARCHAR(5), treatment_75 VARCHAR(5),
+    operation_81 VARCHAR(5), treatment_81 VARCHAR(5),
+    operation_82 VARCHAR(5), treatment_82 VARCHAR(5),
+    operation_83 VARCHAR(5), treatment_83 VARCHAR(5),
+    operation_84 VARCHAR(5), treatment_84 VARCHAR(5),
+    operation_85 VARCHAR(5), treatment_85 VARCHAR(5),
+
+    -- examination
+    date_exam DATE,
+    age_last_birthday INT,
+    presence_dental_caries TINYINT(1),
+    presence_gingivitis TINYINT(1),
+    presence_periodontal_pocket TINYINT(1),
+    presence_oral_debris TINYINT(1),
+    presence_calculus TINYINT(1),
+    presence_neoplasm TINYINT(1),
+    presence_dento_facial_anomaly TINYINT(1),
+
+    -- tooth counts
+    teeth_present INT,
+    caries_for_filling INT,
+    caries_for_extraction INT,
+    root_fragment INT,
+    missing_caries INT,
+    filled_restored INT,
+    total_dmf INT,
+
+    fluoride_application TINYINT(1),
+    examiner VARCHAR(150)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+";
+
+if (!mysqli_query($conn, $create_sql)) {
+    die("Table creation failed: " . mysqli_error($conn));
+}
+
+// Utility: list of all field names we will accept from POST ------------------
+$fields = [
+    // personal
+    'surname','firstname','middle_initial','file_no','dob','sex','city','province','hospital','patient_type','category','address','occupation',
+
+    // child upper
+    'operation_55','treatment_55','operation_54','treatment_54','operation_53','treatment_53','operation_52','treatment_52','operation_51','treatment_51',
+    'operation_61','treatment_61','operation_62','treatment_62','operation_63','treatment_63','operation_64','treatment_64','operation_65','treatment_65',
+
+    // adult upper
+    'operation_18','treatment_18','operation_17','treatment_17','operation_16','treatment_16','operation_15','treatment_15','operation_14','treatment_14','operation_13','treatment_13','operation_12','treatment_12','operation_11','treatment_11',
+    'operation_21','treatment_21','operation_22','treatment_22','operation_23','treatment_23','operation_24','treatment_24','operation_25','treatment_25','operation_26','treatment_26','operation_27','treatment_27','operation_28','treatment_28',
+
+    // lower adult & adult lower
+    'operation_48','treatment_48','operation_47','treatment_47','operation_46','treatment_46','operation_45','treatment_45','operation_44','treatment_44','operation_43','treatment_43','operation_42','treatment_42','operation_41','treatment_41',
+    'operation_31','treatment_31','operation_32','treatment_32','operation_33','treatment_33','operation_34','treatment_34','operation_35','treatment_35','operation_36','treatment_36','operation_37','treatment_37','operation_38','treatment_38',
+
+    // child lower
+    'operation_75','treatment_75','operation_74','treatment_74','operation_73','treatment_73','operation_72','treatment_72','operation_71','treatment_71',
+    'operation_81','treatment_81','operation_82','treatment_82','operation_83','treatment_83','operation_84','treatment_84','operation_85','treatment_85',
+
+    // exam
+    'date_exam','age_last_birthday','presence_dental_caries','presence_gingivitis','presence_periodontal_pocket','presence_oral_debris','presence_calculus','presence_neoplasm','presence_dento_facial_anomaly',
+    'teeth_present','caries_for_filling','caries_for_extraction','root_fragment','missing_caries','filled_restored','total_dmf',
+    'fluoride_application','examiner'
+];
+
+// Handle POST ---------------------------------------------------------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // collect sanitized values (trim)
+    $data = [];
+    foreach ($fields as $f) {
+        if (isset($_POST[$f])) {
+            // For numeric/boolean fields we still treat as string, DB schema will coerce where appropriate
+            $val = trim($_POST[$f]);
+            $data[$f] = $val === '' ? null : $val;
+        } else {
+            $data[$f] = null;
+        }
+    }
+
+    // collect checkboxes that may be arrays: patient_type and category (if user used multiple)
+    if (isset($_POST['ptype'])) {
+        // original HTML sometimes used name="ptype" (checkbox). Accept that too.
+        if (is_array($_POST['ptype'])) $data['patient_type'] = implode(',', array_map('trim', $_POST['ptype']));
+        else $data['patient_type'] = trim($_POST['ptype']);
+    }
+    // also accept patient_type from name="patient_type"
+    if (isset($_POST['patient_type'])) {
+        if (is_array($_POST['patient_type'])) $data['patient_type'] = implode(',', array_map('trim', $_POST['patient_type']));
+        else $data['patient_type'] = trim($_POST['patient_type']);
+    }
+
+    if (isset($_POST['category'])) {
+        if (is_array($_POST['category'])) $data['category'] = implode(',', array_map('trim', $_POST['category']));
+        else $data['category'] = trim($_POST['category']);
+    }
+
+    // ensure boolean-like selects are 0/1
+    $bool_fields = [
+        'presence_dental_caries','presence_gingivitis','presence_periodontal_pocket','presence_oral_debris',
+        'presence_calculus','presence_neoplasm','presence_dento_facial_anomaly','fluoride_application'
+    ];
+    foreach ($bool_fields as $bf) {
+        if ($data[$bf] === null) { /* leave null */ }
+        else {
+            $data[$bf] = ($data[$bf] === '1' || $data[$bf] === 'on' || $data[$bf] === 'yes' || $data[$bf] === 'true') ? 1 : 0;
+        }
+    }
+
+    // prepare insert dynamically
+    $columns = [];
+    $placeholders = [];
+    $types = '';
+    $values = [];
+
+    // add created_by
+    $columns[] = 'created_by';
+    $placeholders[] = '?';
+    $types .= 's';
+    $values[] = $_SESSION['username'];
+
+    foreach ($fields as $f) {
+        $columns[] = $f;
+        $placeholders[] = '?';
+        // treat numbers as strings to simplify binding; DB will coerce numeric fields
+        $types .= 's';
+        $values[] = $data[$f] !== null ? $data[$f] : null;
+    }
+
+    $sql = "INSERT INTO dental_patients (`" . implode('`,`', $columns) . "`) VALUES (" . implode(',', $placeholders) . ")";
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        die("Prepare failed: " . mysqli_error($conn));
+    }
+
+    // bind params dynamically
+    // mysqli_stmt::bind_param requires variables by reference
+    $bind_names[] = $types;
+    for ($i = 0; $i < count($values); $i++) {
+        $bind_names[] = &$values[$i];
+    }
+    call_user_func_array(array($stmt, 'bind_param'), $bind_names);
+
+    if (mysqli_stmt_execute($stmt)) {
+        $insert_id = mysqli_insert_id($conn);
+        echo "SUCCESS|Inserted record ID: " . intval($insert_id);
+    } else {
+        echo "ERROR|Insert failed: " . mysqli_stmt_error($stmt);
+    }
+    mysqli_stmt_close($stmt);
+    // stop further output after POST handling
+    exit();
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Dental Patient | RHU Management System</title>
+  <link rel="stylesheet" href="dentaladd.css" />
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+  <style>
+    /* minimal styles for layout if dentaladd.css missing */
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0}
+    .header{padding:12px;background:#0a6;border-bottom:1px solid #ccc}
+    .sidebar{position:fixed;left:0;top:56px;width:220px;height:100%;background:#f4f4f4;padding:12px}
+    .main{margin-left:240px;padding:18px}
+    fieldset{margin-bottom:12px;padding:12px}
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+    .tooth-input{display:flex;flex-direction:column;align-items:flex-start}
+    .mid-gap{width:28px}
+    .submit-btn{padding:8px 16px;font-size:16px}
+  </style>
+</head>
+<body>
+  <header class="header"><h1>Dental Clinic Management System</h1></header>
+  <div class="sidebar">
+    <ul>
+      <li><a href="homepage.php"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+      <li><a href="dentaldb.html"><ion-icon name="grid-outline"></ion-icon> Dashboard</a></li>
+      <li><a href="#" class="active"><ion-icon name="person-add-outline"></ion-icon> Add Patient</a></li>
+    </ul>
+  </div>
+
+  <main class="main">
+    <section class="content">
+      <h2>Individual Dental Patient Record</h2>
+
+      <form class="fillup_form" method="post" action="dentaladd.php">
+        <!-- Personal Info -->
+        <fieldset>
+          <legend>Personal Information</legend>
+          <div class="form-grid">
+            <div><label>Surname:</label><input type="text" name="surname" required></div>
+            <div><label>First Name:</label><input type="text" name="firstname" required></div>
+            <div><label>Middle Initial:</label><input type="text" name="middle_initial"></div>
+            <div><label>File No.:</label><input type="text" name="file_no" required></div>
+            <div><label>Date of Birth:</label><input type="date" name="dob"></div>
+            <div>
+              <label>Sex:</label>
+              <div class="radio-group">
+                <label><input type="radio" name="sex" value="Male"> Male</label>
+                <label><input type="radio" name="sex" value="Female"> Female</label>
+              </div>
+            </div>
+            <div><label>City:</label><input type="text" name="city"></div>
+            <div><label>Province:</label><input type="text" name="province"></div>
+            <div><label>Hospital:</label><input type="text" name="hospital"></div>
+            <div>
+              <label>Patient Type:</label>
+              <div class="checkbox-group">
+                <label><input type="checkbox" name="patient_type" value="In-Patient"> In-Patient</label>
+                <label><input type="checkbox" name="patient_type" value="Out-Patient"> Out-Patient</label>
+              </div>
+            </div>
+            <div>
+              <label>Category:</label>
+              <div class="checkbox-group">
+                <label><input type="checkbox" name="category" value="Pre-school"> Pre-school</label>
+                <label><input type="checkbox" name="category" value="School Children"> School Children</label>
+                <label><input type="checkbox" name="category" value="Prenatal"> Prenatal</label>
+                <label><input type="checkbox" name="category" value="Adult"> Adult</label>
+              </div>
+            </div>
+            <div><label>Address:</label><input type="text" name="address"></div>
+            <div><label>Occupation:</label><input type="text" name="occupation"></div>
+          </div>
+        </fieldset>
+
+        <!-- Legend omitted for brevity (keeps same as original) -->
+        <fieldset>
+          <legend>Legend (cond & treatment)</legend>
+          <div class="legend-box">Refer to your printed legend.</div>
+        </fieldset>
+
+        <!-- Dental Chart -->
+        <fieldset>
+         <legend>Dental Chart</legend>
+
+          <!-- Upper Teeth -->
+          <div class="tooth-section">
+          <div class="chart-label">Upper Teeth (Operation | Treatment)</div>
+
+          <div class="teeth-row">
+          <div class="tooth-input"><label>55</label><input name="operation_55" maxlength="5"><input name="treatment_55" maxlength="5"></div>
+          <div class="tooth-input"><label>54</label><input name="operation_54" maxlength="5"><input name="treatment_54" maxlength="5"></div>
+          <div class="tooth-input"><label>53</label><input name="operation_53" maxlength="5"><input name="treatment_53" maxlength="5"></div>
+          <div class="tooth-input"><label>52</label><input name="operation_52" maxlength="5"><input name="treatment_52" maxlength="5"></div>
+          <div class="tooth-input"><label>51</label><input name="operation_51" maxlength="5"><input name="treatment_51" maxlength="5"></div>
+
+          <div class="mid-gap"></div>
+
+              <div class="tooth-input"><label>61</label><input name="operation_61" maxlength="5"><input name="treatment_61" maxlength="5"></div>
+              <div class="tooth-input"><label>62</label><input name="operation_62" maxlength="5"><input name="treatment_62" maxlength="5"></div>
+              <div class="tooth-input"><label>63</label><input name="operation_63" maxlength="5"><input name="treatment_63" maxlength="5"></div>
+              <div class="tooth-input"><label>64</label><input name="operation_64" maxlength="5"><input name="treatment_64" maxlength="5"></div>
+              <div class="tooth-input"><label>65</label><input name="operation_65" maxlength="5"><input name="treatment_65" maxlength="5"></div>
+            </div>
+
+            <div class="teeth-row">
+              <div class="tooth-input"><label>18</label><input name="operation_18" maxlength="5"><input name="treatment_18" maxlength="5"></div>
+              <div class="tooth-input"><label>17</label><input name="operation_17" maxlength="5"><input name="treatment_17" maxlength="5"></div>
+              <div class="tooth-input"><label>16</label><input name="operation_16" maxlength="5"><input name="treatment_16" maxlength="5"></div>
+              <div class="tooth-input"><label>15</label><input name="operation_15" maxlength="5"><input name="treatment_15" maxlength="5"></div>
+              <div class="tooth-input"><label>14</label><input name="operation_14" maxlength="5"><input name="treatment_14" maxlength="5"></div>
+              <div class="tooth-input"><label>13</label><input name="operation_13" maxlength="5"><input name="treatment_13" maxlength="5"></div>
+              <div class="tooth-input"><label>12</label><input name="operation_12" maxlength="5"><input name="treatment_12" maxlength="5"></div>
+              <div class="tooth-input"><label>11</label><input name="operation_11" maxlength="5"><input name="treatment_11" maxlength="5"></div>
+
+              <div class="mid-gap"></div>
+
+              <div class="tooth-input"><label>21</label><input name="operation_21" maxlength="5"><input name="treatment_21" maxlength="5"></div>
+              <div class="tooth-input"><label>22</label><input name="operation_22" maxlength="5"><input name="treatment_22" maxlength="5"></div>
+              <div class="tooth-input"><label>23</label><input name="operation_23" maxlength="5"><input name="treatment_23" maxlength="5"></div>
+              <div class="tooth-input"><label>24</label><input name="operation_24" maxlength="5"><input name="treatment_24" maxlength="5"></div>
+              <div class="tooth-input"><label>25</label><input name="operation_25" maxlength="5"><input name="treatment_25" maxlength="5"></div>
+              <div class="tooth-input"><label>26</label><input name="operation_26" maxlength="5"><input name="treatment_26" maxlength="5"></div>
+              <div class="tooth-input"><label>27</label><input name="operation_27" maxlength="5"><input name="treatment_27" maxlength="5"></div>
+              <div class="tooth-input"><label>28</label><input name="operation_28" maxlength="5"><input name="treatment_28" maxlength="5"></div>
+            </div>
+          </div>
+
+          <!-- Lower Teeth -->
+          <div class="tooth-section">
+            <div class="chart-label">Lower Teeth  (Operation | Treatment)</div>
+
+            <div class="teeth-row">
+              <div class="tooth-input"><label>48</label><input name="operation_48" maxlength="5"><input name="treatment_48" maxlength="5"></div>
+              <div class="tooth-input"><label>47</label><input name="operation_47" maxlength="5"><input name="treatment_47" maxlength="5"></div>
+              <div class="tooth-input"><label>46</label><input name="operation_46" maxlength="5"><input name="treatment_46" maxlength="5"></div>
+              <div class="tooth-input"><label>45</label><input name="operation_45" maxlength="5"><input name="treatment_45" maxlength="5"></div>
+              <div class="tooth-input"><label>44</label><input name="operation_44" maxlength="5"><input name="treatment_44" maxlength="5"></div>
+              <div class="tooth-input"><label>43</label><input name="operation_43" maxlength="5"><input name="treatment_43" maxlength="5"></div>
+              <div class="tooth-input"><label>42</label><input name="operation_42" maxlength="5"><input name="treatment_42" maxlength="5"></div>
+              <div class="tooth-input"><label>41</label><input name="operation_41" maxlength="5"><input name="treatment_41" maxlength="5"></div>
+
+              <div class="mid-gap"></div>
+
+              <div class="tooth-input"><label>31</label><input name="operation_31" maxlength="5"><input name="treatment_31" maxlength="5"></div>
+              <div class="tooth-input"><label>32</label><input name="operation_32" maxlength="5"><input name="treatment_32" maxlength="5"></div>
+              <div class="tooth-input"><label>33</label><input name="operation_33" maxlength="5"><input name="treatment_33" maxlength="5"></div>
+              <div class="tooth-input"><label>34</label><input name="operation_34" maxlength="5"><input name="treatment_34" maxlength="5"></div>
+              <div class="tooth-input"><label>35</label><input name="operation_35" maxlength="5"><input name="treatment_35" maxlength="5"></div>
+              <div class="tooth-input"><label>36</label><input name="operation_36" maxlength="5"><input name="treatment_36" maxlength="5"></div>
+              <div class="tooth-input"><label>37</label><input name="operation_37" maxlength="5"><input name="treatment_37" maxlength="5"></div>
+              <div class="tooth-input"><label>38</label><input name="operation_38" maxlength="5"><input name="treatment_38" maxlength="5"></div>
+            </div>
+
+            <div class="teeth-row">
+              <div class="tooth-input"><label>75</label><input name="operation_75" maxlength="5"><input name="treatment_75" maxlength="5"></div>
+              <div class="tooth-input"><label>74</label><input name="operation_74" maxlength="5"><input name="treatment_74" maxlength="5"></div>
+              <div class="tooth-input"><label>73</label><input name="operation_73" maxlength="5"><input name="treatment_73" maxlength="5"></div>
+              <div class="tooth-input"><label>72</label><input name="operation_72" maxlength="5"><input name="treatment_72" maxlength="5"></div>
+              <div class="tooth-input"><label>71</label><input name="operation_71" maxlength="5"><input name="treatment_71" maxlength="5"></div>
+
+              <div class="mid-gap"></div>
+
+              <div class="tooth-input"><label>81</label><input name="operation_81" maxlength="5"><input name="treatment_81" maxlength="5"></div>
+              <div class="tooth-input"><label>82</label><input name="operation_82" maxlength="5"><input name="treatment_82" maxlength="5"></div>
+              <div class="tooth-input"><label>83</label><input name="operation_83" maxlength="5"><input name="treatment_83" maxlength="5"></div>
+              <div class="tooth-input"><label>84</label><input name="operation_84" maxlength="5"><input name="treatment_84" maxlength="5"></div>
+              <div class="tooth-input"><label>85</label><input name="operation_85" maxlength="5"><input name="treatment_85" maxlength="5"></div>
+            </div>
+          </div>
+
+        </fieldset>
+
+        <!-- Examination Section -->
+        <fieldset>
+            <legend>Dental Examination Summary</legend>
+            <div class="form-grid">
+              <div><label>Date of Examination:</label><input type="date" name="date_exam" required></div>
+              <div><label>Age Last Birthday:</label><input type="number" name="age_last_birthday" min="0"></div>
+              <div><label>Presence of Dental Caries:</label>
+                <select name="presence_dental_caries" required><option value="1">Yes</option><option value="0">No</option></select></div>
+              <div><label>Presence of Gingivitis:</label>
+                <select name="presence_gingivitis" required><option value="1">Yes</option><option value="0">No</option></select></div>
+              <div><label>Presence of Periodontal Pocket:</label>
+                <select name="presence_periodontal_pocket" required><option value="1">Yes</option><option value="0">No</option></select></div>
+              <div><label>Presence of Oral Debris:</label>
+                <select name="presence_oral_debris" required><option value="1">Yes</option><option value="0">No</option></select></div>
+              <div><label>Presence of Calculus:</label>
+                <select name="presence_calculus" required><option value="1">Yes</option><option value="0">No</option></select></div>
+              <div><label>Presence of Neoplasm:</label>
+                <select name="presence_neoplasm" required><option value="1">Yes</option><option value="0">No</option></select></div>
+              <div><label>Presence of Dento-Facial Anomaly:</label>
+                <select name="presence_dento_facial_anomaly" required><option value="1">Yes</option><option value="0">No</option></select></div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Tooth Count / DMF Index</legend>
+            <div class="form-grid">
+              <div><label>No. of Teeth Present:</label><input type="number" name="teeth_present" min="0" required></div>
+              <div><label>Caries Indicated for Filling:</label><input type="number" name="caries_for_filling" min="0" required></div>
+              <div><label>Caries Indicated for Extraction:</label><input type="number" name="caries_for_extraction" min="0" required></div>
+              <div><label>Root Fragment:</label><input type="number" name="root_fragment" min="0" required></div>
+              <div><label>Missing Due to Caries:</label><input type="number" name="missing_caries" min="0" required></div>
+              <div><label>Filled or Restored:</label><input type="number" name="filled_restored" min="0" required></div>
+              <div><label>Total DMF Teeth:</label><input type="number" name="total_dmf" min="0" required></div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Fluoride & Examiner</legend>
+            <div class="form-grid">
+              <div><label>Fluoride Application:</label><select name="fluoride_application" required><option value="1">Yes</option><option value="0">No</option></select></div>
+              <div><label>Examiner:</label><input type="text" name="examiner" required></div>
+            </div>
+        </fieldset>
+
+        <button type="submit" class="submit-btn">Save Patient Record</button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+const toothInputs = document.querySelectorAll(".tooth-input input");
+toothInputs.forEach(input => {
+  input.addEventListener("input", () => {
+    if (input.value.length > 5) input.value = input.value.substring(0,5);
+  });
+  input.addEventListener("keydown", (e) => {
+    if (input.value.length >= 5 && e.key !== "Backspace" && e.key !== "Delete") e.preventDefault();
+  });
+});
+
+// Capitalize name fields
+const nameFields = ['surname', 'firstname', 'middle_initial'];
+
+nameFields.forEach(fieldName => {
+  const input = document.querySelector(`input[name="${fieldName}"]`);
+  if (input) {
+    input.addEventListener('input', () => {
+      input.value = input.value
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+    });
+  }
+});
+</script>
+
+	
+</body>
+</html>
