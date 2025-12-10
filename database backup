@@ -1,0 +1,281 @@
+
+CREATE TABLE IF NOT EXISTS admin_accounts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL
+);
+
+-- Insert admin account only if it doesn't exist
+INSERT INTO admin_accounts(username, password)
+VALUES('Gabriel', 'tolomea')
+ON DUPLICATE KEY UPDATE password = VALUES(password);
+
+-- Create healthcheck_patients table if it doesn't exist
+CREATE TABLE IF NOT EXISTS healthcheck_patients (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    NHTS BOOLEAN,
+    FourPs BOOLEAN,
+    NonNHTS BOOLEAN,
+    PWD BOOLEAN,
+    NHTS_HH_no VARCHAR(50),
+    code_no VARCHAR(50),
+    family_no VARCHAR(50),
+    NHTS_member_head VARCHAR(100),
+    DOB_head DATE,
+    relationship_to_household_head VARCHAR(100),
+    PhilHealth_member ENUM('yes', 'no'),
+    PhilHealth_no VARCHAR(50),
+    mother_maiden_name VARCHAR(100),
+    name VARCHAR(100),
+    DOB DATE,
+    age INT,
+    sex VARCHAR(10),
+    status VARCHAR(50),
+    address VARCHAR(255),
+    hx_of_allergies VARCHAR(255),
+    blood_type VARCHAR(10),
+    date_recorded DATE,
+    BP VARCHAR(20),
+    temp VARCHAR(10),
+    weight VARCHAR(10),
+    RR INT,
+    PR INT,
+    height VARCHAR(10)
+);
+
+CREATE TABLE IF NOT EXISTS immunization_records (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    
+    -- Patient Info
+    first_name VARCHAR(50) NOT NULL,
+    middle_name VARCHAR(50),
+    last_name VARCHAR(50) NOT NULL,
+    suffix VARCHAR(10),
+    sex ENUM('Male', 'Female', 'Other') NOT NULL,
+    dob DATE NOT NULL,
+    contact_number VARCHAR(15),
+    
+    -- Address
+    province_code VARCHAR(10) NOT NULL,
+    municipality_code VARCHAR(10) NOT NULL,
+    barangay VARCHAR(100) NOT NULL,
+    
+    -- Vaccine Info
+    vaccine_type VARCHAR(50) NOT NULL,
+    other_vaccine VARCHAR(50),
+    dose_number INT NOT NULL,
+    date_administered DATE NOT NULL,
+    healthcare_provider VARCHAR(100),
+    additional_notes TEXT,
+    
+    -- Record metadata
+    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS maternal_records (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    -- SECTION 1: Mother’s Identification & Vitals
+    family_number VARCHAR(50),
+    nhts_status VARCHAR(50),
+    code_no VARCHAR(50),
+    philhealth_no VARCHAR(50),
+    civil_status VARCHAR(50),
+    contact_no VARCHAR(50),
+    clinic_name VARCHAR(150),
+    maiden_family_name VARCHAR(150),
+    maiden_first_name VARCHAR(150),
+    maiden_middle_name VARCHAR(150),
+    age INT,
+    address VARCHAR(255),
+    dob DATE,
+    occupation VARCHAR(150),
+    height VARCHAR(10),
+    bmi VARCHAR(10),
+    muac VARCHAR(10),
+
+    -- SECTION 2: Husband’s Information
+    husband_family VARCHAR(150),
+    husband_first VARCHAR(150),
+    husband_middle VARCHAR(150),
+    husband_occupation VARCHAR(150),
+
+    -- SECTION 3: Obstetrical History & Complications
+    children_alive INT,
+    living_children INT,
+    abortions INT,
+    stillbirth_count INT,
+
+    complication_hemorrhage TINYINT(1) DEFAULT 0,
+    complication_toxemia TINYINT(1) DEFAULT 0,
+    complication_placenta_previa TINYINT(1) DEFAULT 0,
+    complication_sepsis TINYINT(1) DEFAULT 0,
+    complication_hypertension TINYINT(1) DEFAULT 0,
+
+    -- SECTION 4: Current Signs and Symptoms
+    symptom_nausea TINYINT(1) DEFAULT 0,
+    symptom_vomiting TINYINT(1) DEFAULT 0,
+    symptom_headache TINYINT(1) DEFAULT 0,
+    symptom_dizziness TINYINT(1) DEFAULT 0,
+    symptom_leucorrhea TINYINT(1) DEFAULT 0,
+    symptom_edema TINYINT(1) DEFAULT 0,
+    symptom_cramps TINYINT(1) DEFAULT 0,
+    symptom_bleeding TINYINT(1) DEFAULT 0,
+    symptom_pruritis TINYINT(1) DEFAULT 0,
+    symptom_blurring TINYINT(1) DEFAULT 0,
+
+    -- SECTION 5: Dietary Pattern, Preparation & Delivery Info
+    food_regular VARCHAR(255),
+    food_avoided VARCHAR(255),
+    preg_stage VARCHAR(50),
+    prepared_bf VARCHAR(10),
+    not_prepared_reason VARCHAR(255),
+    delivery_date DATE,
+    delivery_type VARCHAR(100),
+    delivery_place VARCHAR(150),
+    attended_by VARCHAR(150),
+    designation VARCHAR(150),
+    delivery_address VARCHAR(255),
+
+    -- SECTION 6: Ante-partum (GTPAL) & Lab Data
+    lmp DATE,
+    edc DATE,
+    risk_code VARCHAR(50),
+    deworming VARCHAR(50),
+    gravida INT,
+    term INT,
+    para INT,
+    abortion INT,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+ -- medicine add
+CREATE TABLE IF NOT EXISTS medicines (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    medicine_name VARCHAR(255) NOT NULL,
+    quantity INT NOT NULL,
+    unit VARCHAR(50) NOT NULL,
+    expiration_date DATE NOT NULL,
+    batch_number VARCHAR(100),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+ -- medicine edit
+CREATE TABLE IF NOT EXISTS medicine_distribution (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_first_name VARCHAR(100) NOT NULL,
+    patient_middle_name VARCHAR(100),
+    patient_last_name VARCHAR(100) NOT NULL,
+    patient_suffix VARCHAR(50),
+    patient_sex VARCHAR(10),
+    patient_dob DATE,
+    patient_contact VARCHAR(50),
+    medicine_id INT NOT NULL,
+    quantity_given INT NOT NULL,
+    date_given DATE NOT NULL,
+    time_given TIME,
+    staff_name VARCHAR(100) NOT NULL,
+    staff_role VARCHAR(100),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (medicine_id) REFERENCES medicines(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS dental_patients (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    created_by VARCHAR(150) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    -- Personal Info
+    surname VARCHAR(150),
+    firstname VARCHAR(150),
+    middle_initial VARCHAR(10),
+    file_no VARCHAR(100),
+    dob DATE,
+    sex VARCHAR(10),
+    city VARCHAR(150),
+    province VARCHAR(150),
+    hospital VARCHAR(150),
+    patient_type VARCHAR(100),
+    category VARCHAR(200),
+    address VARCHAR(255),
+    occupation VARCHAR(150),
+
+    -- Dental Chart
+    operation_11 VARCHAR(5), treatment_11 VARCHAR(5),
+    operation_12 VARCHAR(5), treatment_12 VARCHAR(5),
+    operation_13 VARCHAR(5), treatment_13 VARCHAR(5),
+    operation_14 VARCHAR(5), treatment_14 VARCHAR(5),
+    operation_15 VARCHAR(5), treatment_15 VARCHAR(5),
+    operation_16 VARCHAR(5), treatment_16 VARCHAR(5),
+    operation_17 VARCHAR(5), treatment_17 VARCHAR(5),
+    operation_18 VARCHAR(5), treatment_18 VARCHAR(5),
+    operation_21 VARCHAR(5), treatment_21 VARCHAR(5),
+    operation_22 VARCHAR(5), treatment_22 VARCHAR(5),
+    operation_23 VARCHAR(5), treatment_23 VARCHAR(5),
+    operation_24 VARCHAR(5), treatment_24 VARCHAR(5),
+    operation_25 VARCHAR(5), treatment_25 VARCHAR(5),
+    operation_26 VARCHAR(5), treatment_26 VARCHAR(5),
+    operation_27 VARCHAR(5), treatment_27 VARCHAR(5),
+    operation_28 VARCHAR(5), treatment_28 VARCHAR(5),
+    operation_31 VARCHAR(5), treatment_31 VARCHAR(5),
+    operation_32 VARCHAR(5), treatment_32 VARCHAR(5),
+    operation_33 VARCHAR(5), treatment_33 VARCHAR(5),
+    operation_34 VARCHAR(5), treatment_34 VARCHAR(5),
+    operation_35 VARCHAR(5), treatment_35 VARCHAR(5),
+    operation_36 VARCHAR(5), treatment_36 VARCHAR(5),
+    operation_37 VARCHAR(5), treatment_37 VARCHAR(5),
+    operation_38 VARCHAR(5), treatment_38 VARCHAR(5),
+    operation_41 VARCHAR(5), treatment_41 VARCHAR(5),
+    operation_42 VARCHAR(5), treatment_42 VARCHAR(5),
+    operation_43 VARCHAR(5), treatment_43 VARCHAR(5),
+    operation_44 VARCHAR(5), treatment_44 VARCHAR(5),
+    operation_45 VARCHAR(5), treatment_45 VARCHAR(5),
+    operation_46 VARCHAR(5), treatment_46 VARCHAR(5),
+    operation_47 VARCHAR(5), treatment_47 VARCHAR(5),
+    operation_48 VARCHAR(5), treatment_48 VARCHAR(5),
+    operation_51 VARCHAR(5), treatment_51 VARCHAR(5),
+    operation_52 VARCHAR(5), treatment_52 VARCHAR(5),
+    operation_53 VARCHAR(5), treatment_53 VARCHAR(5),
+    operation_54 VARCHAR(5), treatment_54 VARCHAR(5),
+    operation_55 VARCHAR(5), treatment_55 VARCHAR(5),
+    operation_61 VARCHAR(5), treatment_61 VARCHAR(5),
+    operation_62 VARCHAR(5), treatment_62 VARCHAR(5),
+    operation_63 VARCHAR(5), treatment_63 VARCHAR(5),
+    operation_64 VARCHAR(5), treatment_64 VARCHAR(5),
+    operation_65 VARCHAR(5), treatment_65 VARCHAR(5),
+    operation_71 VARCHAR(5), treatment_71 VARCHAR(5),
+    operation_72 VARCHAR(5), treatment_72 VARCHAR(5),
+    operation_73 VARCHAR(5), treatment_73 VARCHAR(5),
+    operation_74 VARCHAR(5), treatment_74 VARCHAR(5),
+    operation_75 VARCHAR(5), treatment_75 VARCHAR(5),
+    operation_81 VARCHAR(5), treatment_81 VARCHAR(5),
+    operation_82 VARCHAR(5), treatment_82 VARCHAR(5),
+    operation_83 VARCHAR(5), treatment_83 VARCHAR(5),
+    operation_84 VARCHAR(5), treatment_84 VARCHAR(5),
+    operation_85 VARCHAR(5), treatment_85 VARCHAR(5),
+
+    -- Examination
+    date_exam DATE,
+    age_last_birthday INT,
+    presence_dental_caries TINYINT(1),
+    presence_gingivitis TINYINT(1),
+    presence_periodontal_pocket TINYINT(1),
+    presence_oral_debris TINYINT(1),
+    presence_calculus TINYINT(1),
+    presence_neoplasm TINYINT(1),
+    presence_dento_facial_anomaly TINYINT(1),
+
+    -- Tooth Counts / DMF
+    teeth_present INT,
+    caries_for_filling INT,
+    caries_for_extraction INT,
+    root_fragment INT,
+    missing_caries INT,
+    filled_restored INT,
+    total_dmf INT,
+
+    fluoride_application TINYINT(1),
+    examiner VARCHAR(150)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
