@@ -1,0 +1,253 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap'); 
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-color: #e9f8f4;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background-color: #1e8c72;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 30px;
+  z-index: 1000;
+}
+
+/* SIDEBAR */
+.sidebar {
+  position: fixed;
+  top: 70px;
+  left: 0;
+  width: 240px;
+  height: calc(100% - 70px);
+  background-color: #57cba7;
+  color: white;
+  padding: 25px 20px;
+}
+
+.sidebar ul {
+  list-style: none;
+}
+
+.sidebar ul li a {
+  display: block;
+  color: #fff;
+  text-decoration: none;
+  margin-top: 10px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.sidebar ul li a:hover {
+  background-color: #b2f2dc;
+  color: #1e8c72;
+  font-weight: 600;
+}
+
+.sidebar ul li a.active {
+  background-color: #b2f2dc;
+  color: #1e8c72;
+  font-weight: 600;
+  transform: scale(1.1);
+}
+
+/* MAIN CONTENT */
+.main {
+  margin-left: 260px;
+  padding: 100px 40px 50px;
+  background-color: #e9f8f4;
+  min-height: 100vh;
+}
+
+.content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.content h2 {
+  text-align: center;
+  color: #2e7267;
+  margin-bottom: 25px;
+  font-weight: 600;
+}
+
+/* FORM */
+.fillup_form fieldset {
+  border: 1px solid #b5e3da;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.fillup_form legend {
+  padding: 0 10px;
+  color: #1e8c72;
+  font-weight: 600;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px 30px;
+  margin-top: 15px;
+}
+
+label {
+  display: block;
+  font-weight: 500;
+  color: #2e7267;
+  margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="date"],
+textarea,
+select,
+input[type="number"] {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #b5e3da;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  background-color: #f9fdfc;
+  color: #2e7267;
+  transition: 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus,
+input[type="number"]:focus {
+  border-color: #1e8c72;
+  box-shadow: 0 0 4px rgba(30, 140, 114, 0.45);
+  background-color: #ffffff;
+}
+
+textarea {
+  resize: none;
+}
+
+.radio-group,
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+}
+
+/* DENTAL CHART */
+.tooth-section {
+  margin-top: 20px;
+}
+
+.chart-label {
+  text-align: center;
+  margin: 10px 0 5px;
+  font-weight: 600;
+  color: #2e7267;
+}
+
+.teeth-row {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin: 10px 0;
+}
+
+.tooth-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tooth-input label {
+  font-size: 11px;
+  margin-bottom: 3px;
+}
+
+.tooth-input input {
+  width: 35px;
+  height: 35px;
+  font-size: 12px;
+  border: 2px solid #3f8d82;
+  text-align: center;
+  border-radius: 6px;
+  background: #f9fdfc;
+}
+
+.tooth-input input:focus {
+  border-color: #1e8c72;
+}
+
+.mid-gap {
+  width: 30px;
+}
+
+/* LEGEND */
+.legend-box {
+  text-align: center;
+  margin-top: 15px;
+  padding: 10px;
+  background: #e8f9f3;
+  border: 1px solid #b5e3da;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1e8c72;
+}
+
+.legend-columns {
+  display: flex;
+  gap: 60px;
+  flex-wrap: wrap;
+  justify-content: center;
+  text-align: left;
+}
+
+.legend-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.legend-table th,
+.legend-table td {
+  padding: 5px 15px;
+  border: 1px solid #ccc;
+}
+
+/* SUBMIT BUTTON */
+.submit-btn {
+  display: block;
+  margin: 25px auto 0;
+  background-color: #1e8c72;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.submit-btn:hover {
+  background-color: #3f8d82;
+}
