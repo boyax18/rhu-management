@@ -1,0 +1,278 @@
+<?php
+session_start();
+include 'db_connect.php';
+
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Fetch all patients
+$sql = "SELECT * FROM dental_patients ORDER BY id DESC";
+$result = mysqli_query($conn, $sql);
+$total = mysqli_num_rows($result);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dental Dashboard | RHU Management System</title>
+<link rel="stylesheet" href="dentaldb.css">
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+<style>
+/* Modal styling */
+.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:999; }
+.modal.show { display:flex; }
+.modal-content { background:#fff; padding:20px; width:95%; max-width:1200px; max-height:90%; overflow:auto; border-radius:8px; position:relative; }
+.close-btn { position:absolute; top:10px; right:15px; font-size:25px; cursor:pointer; }
+.view-grid, .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-bottom:10px; }
+.field-label { font-weight:bold; }
+.field-value, input, select { width: 100%; padding:4px; box-sizing:border-box; }
+input[disabled], select[disabled], textarea[disabled] { background:#f0f0f0; }
+.tooth-input { display:flex; flex-direction:column; align-items:flex-start; }
+.teeth-row { display:flex; flex-wrap:wrap; margin-bottom:10px; }
+.mid-gap { width:28px; }
+.legend-columns { display:flex; gap:20px; flex-wrap:wrap; }
+.legend-column table { border-collapse: collapse; width:100%; }
+.legend-column th, .legend-column td { border:1px solid #ccc; padding:4px; text-align:center; }
+</style>
+</head>
+<body>
+
+<header class="header">
+<h1>Dental Clinic Management System</h1>
+</header>
+
+<div class="sidebar">
+<ul>
+<li><a href="homepage.php"><ion-icon name="home-outline"></ion-icon> Home</a></li>
+<li><a href="#" class="active"><ion-icon name="grid-outline"></ion-icon> Dashboard</a></li>
+<li><a href="dentaladd.php"><ion-icon name="person-add-outline"></ion-icon> Add Patient</a></li>
+</ul>
+</div>
+
+<main class="main">
+<section class="content">
+<h2>List of Patients</h2>
+
+<div class="top-bar">
+    <div class="search-box">
+      <ion-icon name="search-outline"></ion-icon>
+      <input type="text" id="searchInput" placeholder="Search" />
+    </div>
+    <div class="total">
+      <span>Total Patients:</span>
+      <div class="count"><?php echo $total; ?></div>
+    </div>
+</div>
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>File No.</th>
+<th>Name (Last, First M.)</th>
+<th>Sex</th>
+<th>Date</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<?php
+if ($total > 0) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $full_name = $row['surname'] . ', ' . $row['firstname'] . ' ' . $row['middle_initial'];
+        echo '<tr>';
+        echo '<td>'.htmlspecialchars($row['file_no']).'</td>';
+        echo '<td>'.htmlspecialchars($full_name).'</td>';
+        echo '<td>'.htmlspecialchars($row['sex']).'</td>';
+        echo '<td>'.htmlspecialchars($row['date_exam']).'</td>';
+        $row_json = htmlspecialchars(json_encode($row), ENT_QUOTES, 'UTF-8');
+        echo "<td><button class='view-btn' data-patient='$row_json'>View</button></td>";
+        echo '</tr>';
+    }
+} else {
+    echo '<tr><td colspan="5">No patient records found.</td></tr>';
+}
+?>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+
+<!-- Modal -->
+<div class="modal" id="patientModal">
+  <div class="modal-content" id="modalContent">
+    <span class="close-btn" id="closeModal">&times;</span>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+const modal = document.getElementById('patientModal');
+const modalBody = document.getElementById('modalBody');
+const closeBtn = document.getElementById('closeModal');
+
+document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const data = JSON.parse(btn.getAttribute('data-patient'));
+
+        // Build full form inside modal, readonly
+        modalBody.innerHTML = `
+<h2>Patient Details</h2>
+
+<!-- Personal Info -->
+<fieldset>
+<legend>Personal Information</legend>
+<div class="form-grid">
+<div><label>Surname:</label><input type="text" value="${data.surname||''}" disabled></div>
+<div><label>First Name:</label><input type="text" value="${data.firstname||''}" disabled></div>
+<div><label>Middle Initial:</label><input type="text" value="${data.middle_initial||''}" disabled></div>
+<div><label>File No.:</label><input type="text" value="${data.file_no||''}" disabled></div>
+<div><label>Date of Birth:</label><input type="date" value="${data.dob||''}" disabled></div>
+<div><label>Sex:</label><input type="text" value="${data.sex||''}" disabled></div>
+<div><label>City:</label><input type="text" value="${data.city||''}" disabled></div>
+<div><label>Province:</label><input type="text" value="${data.province||''}" disabled></div>
+<div><label>Hospital:</label><input type="text" value="${data.hospital||''}" disabled></div>
+<div><label>Patient Type:</label><input type="text" value="${data.patient_type||''}" disabled></div>
+<div><label>Category:</label><input type="text" value="${data.category||''}" disabled></div>
+<div><label>Address:</label><input type="text" value="${data.address||''}" disabled></div>
+<div><label>Occupation:</label><input type="text" value="${data.occupation||''}" disabled></div>
+</div>
+</fieldset>
+
+<!-- Legend -->
+<fieldset>
+<legend>Legend (Condition & Treatment)</legend>
+<div class="legend-columns">
+<div class="legend-column">
+<strong>Condition</strong>
+<table class="legend-table">
+<tr><th>Permanent</th><th>Tooth Condition</th><th>Temporary</th></tr>
+<tr><td>✔</td><td>Sound/Sealed</td><td>✔</td></tr>
+<tr><td>D</td><td>Decayed</td><td>d</td></tr>
+<tr><td>F</td><td>Filled</td><td>f</td></tr>
+<tr><td>M</td><td>Missing</td><td>m</td></tr>
+<tr><td>DX</td><td>Indicated for Extraction</td><td>dx</td></tr>
+<tr><td>Un</td><td>Unerupted</td><td>un</td></tr>
+<tr><td>S</td><td>Supernumerary Tooth</td><td>s</td></tr>
+<tr><td>JC</td><td>Jacket Crown</td><td>jc</td></tr>
+<tr><td>P</td><td>Pontic</td><td>p</td></tr>
+</table>
+</div>
+<div class="legend-column">
+<strong>Treatment</strong>
+<table class="legend-table">
+<tr><td>FV</td><td>Fluoride Varnish</td></tr>
+<tr><td>FG</td><td>Fluoride Gel</td></tr>
+<tr><td>PFS</td><td>Pit and Fissure Sealant</td></tr>
+<tr><td>PF</td><td>Permanent Filling</td></tr>
+<tr><td>TF</td><td>Temporary Filling</td></tr>
+<tr><td>X</td><td>Extraction</td></tr>
+<tr><td>O</td><td>Others</td></tr>
+</table>
+</div>
+</div>
+</fieldset>
+
+<!-- Dental Chart Upper Teeth -->
+<fieldset>
+<legend>Dental Chart</legend>
+<div class="tooth-section">
+<div class="chart-label">Upper Teeth</div>
+<div class="teeth-row">
+${['55','54','53','52','51','61','62','63','64','65'].map(n => 
+`<div class="tooth-input"><label>${n}</label>
+<input value="${data['operation_'+n]||''}" disabled>
+<input value="${data['treatment_'+n]||''}" disabled></div>`).join('')}
+</div>
+<div class="teeth-row">
+${['18','17','16','15','14','13','12','11','21','22','23','24','25','26','27','28'].map(n => 
+`<div class="tooth-input"><label>${n}</label>
+<input value="${data['operation_'+n]||''}" disabled>
+<input value="${data['treatment_'+n]||''}" disabled></div>`).join('')}
+</div>
+</div>
+
+<div class="tooth-section">
+<div class="chart-label">Lower Teeth</div>
+<div class="teeth-row">
+${['48','47','46','45','44','43','42','41','31','32','33','34','35','36','37','38'].map(n => 
+`<div class="tooth-input"><label>${n}</label>
+<input value="${data['operation_'+n]||''}" disabled>
+<input value="${data['treatment_'+n]||''}" disabled></div>`).join('')}
+</div>
+<div class="teeth-row">
+${['75','74','73','72','71','81','82','83','84','85'].map(n => 
+`<div class="tooth-input"><label>${n}</label>
+<input value="${data['operation_'+n]||''}" disabled>
+<input value="${data['treatment_'+n]||''}" disabled></div>`).join('')}
+</div>
+</div>
+</fieldset>
+
+<!-- Examination Summary -->
+<fieldset>
+<legend>Dental Examination Summary</legend>
+<div class="form-grid">
+<div><label>Date of Examination:</label><input type="date" value="${data.date_exam||''}" disabled></div>
+<div><label>Age Last Birthday:</label><input type="number" value="${data.age_last_birthday||''}" disabled></div>
+<div><label>Presence of Dental Caries:</label><input type="text" value="${data.presence_dental_caries||''}" disabled></div>
+<div><label>Presence of Gingivitis:</label><input type="text" value="${data.presence_gingivitis||''}" disabled></div>
+<div><label>Presence of Periodontal Pocket:</label><input type="text" value="${data.presence_periodontal_pocket||''}" disabled></div>
+<div><label>Presence of Oral Debris:</label><input type="text" value="${data.presence_oral_debris||''}" disabled></div>
+<div><label>Presence of Calculus:</label><input type="text" value="${data.presence_calculus||''}" disabled></div>
+<div><label>Presence of Neoplasm:</label><input type="text" value="${data.presence_neoplasm||''}" disabled></div>
+<div><label>Presence of Dento-Facial Anomaly:</label><input type="text" value="${data.presence_dento_facial_anomaly||''}" disabled></div>
+</div>
+</fieldset>
+
+<!-- Tooth Count / DMF -->
+<fieldset>
+<legend>Tooth Count / DMF Index</legend>
+<div class="form-grid">
+${['teeth_present','caries_for_filling','caries_for_extraction','root_fragment','missing_caries','filled_restored','total_dmf'].map(f =>
+`<div><label>${f.replace(/_/g,' ').replace(/\b\w/g, l=>l.toUpperCase())}:</label>
+<input value="${data[f]||''}" disabled></div>`).join('')}
+</div>
+</fieldset>
+
+<!-- Fluoride & Examiner -->
+<fieldset>
+<legend>Fluoride & Examiner</legend>
+<div class="form-grid">
+<div><label>Fluoride Application:</label><input value="${data.fluoride_application||''}" disabled></div>
+<div><label>Examiner:</label><input value="${data.examiner||''}" disabled></div>
+</div>
+</fieldset>
+
+<button id="download-pdf">Download PDF</button>
+`;
+
+        modal.classList.add('show');
+
+        document.getElementById('download-pdf').onclick = () => {
+            const patientName = data.firstname ? data.firstname+'_'+data.surname : 'patient_record';
+            html2pdf().from(modalBody).set({ filename: patientName+'.pdf' }).save();
+        }
+    });
+});
+
+closeBtn.onclick = () => modal.classList.remove('show');
+modal.addEventListener('click', e => { if(e.target === modal) modal.classList.remove('show'); });
+
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    const filter = this.value.toLowerCase();
+    document.querySelectorAll('.table-container tbody tr').forEach(row => {
+        const id = (row.cells[0]?.textContent || '').toLowerCase();
+        const name = (row.cells[1]?.textContent || '').toLowerCase();
+        row.style.display = (id.includes(filter) || name.includes(filter)) ? '' : 'none';
+    });
+});
+</script>
+</body>
+</html>
